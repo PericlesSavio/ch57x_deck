@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- CH57x Deck — paleta espelha macropad/theme.py (Monokai escuro).
+       Grade de teclas à esquerda (uma "selecionada" em destaque) e um
+       knob à direita, ecoando o layout real do macropad. -->
+  <rect width="256" height="256" fill="#272822"/>
+  <rect x="18" y="66" width="62" height="62" fill="#32332c" stroke="#c2c3bd" stroke-width="6"/>
+  <rect x="88" y="66" width="62" height="62" fill="#32332c" stroke="#4a4b44" stroke-width="6"/>
+  <rect x="18" y="136" width="62" height="62" fill="#32332c" stroke="#4a4b44" stroke-width="6"/>
+  <rect x="88" y="136" width="62" height="62" fill="#32332c" stroke="#4a4b44" stroke-width="6"/>
+  <circle cx="202" cy="128" r="42" fill="#32332c" stroke="#4a4b44" stroke-width="6"/>
+  <line x1="202" y1="128" x2="202" y2="94" stroke="#c2c3bd" stroke-width="6" stroke-linecap="square"/>
+</svg>

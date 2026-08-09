@@ -1,0 +1,154 @@
+English | [Português](README.pt-BR.md) | [Español](README.es.md)
+
+# CH57x Deck
+
+**Graphical frontend (Qt/PySide6) for
+[ch57x-keyboard-tool](https://github.com/kriomant/ch57x-keyboard-tool)** —
+CH57x Deck doesn't talk to the macropad directly; it builds the configuration
+in a visual interface and delegates all USB communication (validation and
+writing) to that command-line binary, calling it as a subprocess. Without
+ch57x-keyboard-tool installed, the app runs but can't write anything (that's
+why it offers to install it automatically — see "Requirements").
+
+Used to configure macropads based on the CH57x chip (USB VID `1189`, PIDs
+`8840`/`8842`/`8890` — the generic 3/6/9/12/15-key models with knobs).
+Writing happens **on the device firmware**: once uploaded, the mapping works
+on any computer, without needing this app or a running daemon.
+
+## Hardware
+
+![Tested macropad](assets/macropad-hardware.png)
+
+The pictured unit is a generic RGB CH57x macropad with two knobs and a
+detachable USB cable — this kind of device, sold under many different
+brand names, is what CH57x Deck targets.
+
+## Requirements
+
+- Linux with systemd/udev (Fedora, Ubuntu/Debian, Arch, openSUSE…)
+- Python 3.10+
+- `ch57x-keyboard-tool`: if it's not on the PATH, the app itself offers to
+  download the official release on first run (into
+  `~/.local/share/ch57x_deck/bin`)
+
+## Installation
+
+```bash
+./install.sh
+```
+
+Installs the app (pip, user-level, no root), the icon and application menu
+entry, and — asking first — the udev rule for USB access without root. Run
+as a regular user; `sudo` is only used for that last, optional step. To
+remove everything it installed:
+
+```bash
+./install.sh --uninstall
+```
+
+(interactively asks before deleting your saved configuration; everything
+else is removed unconditionally).
+
+### Manual install
+
+If you'd rather do it by hand, or just want the `ch57x-deck` command
+without desktop integration:
+
+```bash
+pip install --user -e .
+```
+
+This installs the dependencies (PySide6, PyYAML) and creates the
+`ch57x-deck` command in `~/.local/bin` (needs to be on `PATH`, which is the
+default on most distros). `-e` makes the package "editable": changes to
+files under `macropad/` take effect immediately, no reinstall needed —
+useful during development; for a purely end-user install, either way works.
+
+<details>
+<summary>Icon, menu entry and USB permission, by hand</summary>
+
+```bash
+# Icon and application menu shortcut
+cp assets/ch57x-deck.svg ~/.local/share/icons/hicolor/scalable/apps/
+cp assets/ch57x-deck.desktop ~/.local/share/applications/
+gtk-update-icon-cache ~/.local/share/icons/hicolor 2>/dev/null
+update-desktop-database ~/.local/share/applications 2>/dev/null
+
+# USB permission (root, one-time)
+sudo cp udev/70-macropad-ch57x.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules && sudo udevadm trigger
+```
+
+The app also offers to install the udev rule itself, via `pkexec`, if it
+detects the macropad without permission.
+
+</details>
+
+## Usage
+
+```bash
+ch57x-deck
+```
+
+Without installing (e.g. just to try it out), you can also run it directly
+from the repository with `python run.py`.
+
+1. Pick the **layer** (the macropad has 3, switched with the side button).
+2. Click a **key or knob function** on the grid.
+3. Build the action in the editor:
+   - **Keyboard** — modifiers + key; up to 5 chained steps (macro).
+   - **Media** — play/pause, volume, etc. (the firmware doesn't allow
+     modifiers together with media keys).
+   - **Advanced** — free-form expression: mouse (`click(left)`,
+     `wheel(-1)`), raw code (`<110>`), manual macros (`ctrl-c,ctrl-v`).
+4. **Validate** checks the YAML; **Send to macropad** writes it to firmware.
+
+The last uploaded configuration is kept at
+`~/.config/ch57x_deck/current.yaml` (and reloaded when the app opens).
+`File → Save/Open` exports and imports YAML compatible with plain
+`ch57x-keyboard-tool`.
+
+## Future plans
+
+- **Support for the 3/6/9/15-key and 0–3-knob variants.** The backend
+  (ch57x-keyboard-tool) and the YAML model already accept any geometry;
+  what's missing is the interface rebuilding the grid when the geometry
+  changes, plus a "Macropad model" menu (geometry isn't detectable over
+  USB). Today the UI assumes 3×4 + 2 knobs, and opening a YAML with a
+  different geometry breaks (`IndexError` in `_refresh_pad_labels`).
+- **Automated tests** (pytest) for `model.py` (YAML serialization) and
+  `keys.py` (action validation) — today all verification is manual.
+- **Named profiles.** Today there's only one autosaved configuration
+  (`current.yaml`); `File → Save/Open` covers manual import/export, but not
+  quickly switching between profiles (e.g. "Work" vs. "Gaming") from the
+  menu.
+- **Pick a license** before publishing the repository publicly — not
+  decided yet.
+
+### Known limitation (not currently possible)
+
+**Reading the mapping already written to the macropad.**
+`ch57x-keyboard-tool` only exposes `upload` (write), not a read command —
+there's no way to "import" what's already on the device, only rebuild it
+from a locally saved YAML.
+
+## Structure
+
+| File | Role |
+| --- | --- |
+| `macropad/model.py` | In-memory config + YAML (de)serialization |
+| `macropad/keys.py` | Catalog of the firmware's keys/modifiers |
+| `macropad/backend.py` | Calls ch57x-keyboard-tool; detects USB via sysfs |
+| `macropad/action_editor.py` | Widget for editing one action |
+| `macropad/keyboard_widget.py` | Clickable visual keyboard |
+| `macropad/test_area.py` | Test area (captures what the pad sends) |
+| `macropad/main_window.py` | Main window |
+| `macropad/i18n.py` | Translations (pt-BR, en, es) |
+| `macropad/settings.py` | Persistent preferences |
+| `macropad/theme.py` | Monokai theme (dark gray, square corners) |
+| `udev/70-macropad-ch57x.rules` | USB permission rule |
+| `pyproject.toml` | Packaging; generates the `ch57x-deck` command |
+| `assets/ch57x-deck.svg` | App icon (matches `theme.py`'s palette) |
+| `assets/ch57x-deck.desktop` | Application menu shortcut |
+| `install.sh` | One-step install/uninstall (`--uninstall`) |
+| `packaging/ch57x-deck-uninstall` | Self-contained uninstall, run by `install.sh --uninstall` |

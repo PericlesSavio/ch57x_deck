@@ -1,0 +1,8 @@
+# Macropads CH57x (VID 0x1189) — acesso sem root para o usuário logado.
+# TAG+="uaccess" funciona em qualquer distro com systemd-logind
+# (Fedora, Ubuntu/Debian, Arch, openSUSE...).
+# IMPORTANTE: o prefixo do arquivo precisa ser menor que 73, porque a tag
+# uaccess é processada pela 73-seat-late.rules do systemd.
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1189", ATTRS{idProduct}=="8840", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1189", ATTRS{idProduct}=="8842", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1189", ATTRS{idProduct}=="8890", TAG+="uaccess"

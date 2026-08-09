@@ -1,0 +1,36 @@
+#!/bin/sh
+# Removes everything installed by CH57x Deck's install.sh. Self-contained:
+# every path here is absolute, so it works without the project folder.
+set -e
+
+if [ "$(id -u)" = 0 ]; then
+	SUDO=""
+else
+	SUDO="sudo"
+fi
+
+DESKTOP_ID=ch57x-deck
+
+echo "==> Uninstalling CH57x Deck"
+python3 -m pip uninstall -y ch57x-deck 2>/dev/null || true
+rm -f "$HOME/.local/share/icons/hicolor/scalable/apps/$DESKTOP_ID.svg"
+rm -f "$HOME/.local/share/applications/$DESKTOP_ID.desktop"
+rm -rf "$HOME/.local/share/ch57x_deck" # ch57x-keyboard-tool baixado automaticamente
+update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
+gtk-update-icon-cache -q "$HOME/.local/share/icons/hicolor" 2>/dev/null || true
+$SUDO rm -f /etc/udev/rules.d/70-macropad-ch57x.rules
+$SUDO udevadm control --reload-rules 2>/dev/null || true
+
+# User data: ask when interactive, keep (with a hint) otherwise.
+if [ -t 0 ]; then
+	printf "Also remove your saved macropad configuration and preferences? [y/N] "
+	read -r answer
+	case "$answer" in
+	[yY]*) rm -rf "$HOME/.config/ch57x_deck" ;;
+	*) echo "Configuration kept at ~/.config/ch57x_deck" ;;
+	esac
+else
+	echo "Configuration kept at ~/.config/ch57x_deck (remove with: rm -rf ~/.config/ch57x_deck)"
+fi
+
+echo "Done."

@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# Snapshot manual pré-teclado-visual, superado pelo histórico do git
+backup/
+
+# WebP mal-nomeado .png; substituído por assets/macropad-hardware.png
+/macropad.png

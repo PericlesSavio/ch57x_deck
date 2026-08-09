@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=CH57x Deck
+GenericName=Configurador de Macropad
+GenericName[en]=Macropad Configurator
+GenericName[es]=Configurador de Macropad
+Comment=Configura macropads baseados no chip CH57x
+Comment[en]=Configure CH57x-based macropads
+Comment[es]=Configura macropads basados en el chip CH57x
+Exec=ch57x-deck
+Icon=ch57x-deck
+Terminal=false
+Categories=Utility;HardwareSettings;

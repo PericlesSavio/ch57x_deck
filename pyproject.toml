@@ -1,0 +1,27 @@
+[project]
+name = "ch57x-deck"
+dynamic = ["version"]
+description = "Interface Qt para configurar macropads baseados no chip CH57x"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Péricles Sávio" }]
+dependencies = [
+    "PySide6>=6.5",
+    "PyYAML>=6.0",
+]
+
+[project.urls]
+"ch57x-keyboard-tool" = "https://github.com/kriomant/ch57x-keyboard-tool"
+
+[project.scripts]
+ch57x-deck = "macropad.__main__:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["macropad"]
+
+[tool.setuptools.dynamic]
+version = { attr = "macropad.__version__" }
