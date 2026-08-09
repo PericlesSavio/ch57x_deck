@@ -28,6 +28,15 @@ diferentes, é o alvo do CH57x Deck.
 
 - Linux com systemd/udev (Fedora, Ubuntu/Debian, Arch, openSUSE…)
 - Python 3.10+
+- O PySide6 instalado via pip exige **glibc ≥ 2.34** (o wheel embute o
+  próprio Qt, e esse é o piso dele). Satisfeito pelas versões atuais —
+  Fedora 35+, Ubuntu 22.04+, Debian 12+, RHEL/Rocky/Alma 9+, Arch, openSUSE
+  Tumbleweed. Em LTS mais antigas ainda em uso (Ubuntu 20.04, Debian 11,
+  RHEL/Rocky/Alma 8), instale o PySide6 pelo pacote da própria distro em
+  vez do pip — ex.: `apt install python3-pyside6.qtwidgets`, `dnf install
+  python3-pyside6`, `pacman -S pyside6` — e então instale o CH57x Deck
+  normalmente; ele detecta e reaproveita essa cópia em vez de baixar o
+  wheel do pip.
 - `ch57x-keyboard-tool`: se não estiver no PATH, o próprio app oferece
   baixar a release oficial na primeira execução (para
   `~/.local/share/ch57x_deck/bin`)
