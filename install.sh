@@ -70,6 +70,7 @@ echo "==> Installing CH57x Deck (pip, user-level, no root)"
 python3 -m pip install --user .
 
 echo "==> Installing the icon and application menu entry"
+[ -f "$ICON" ] && REINSTALL=1  # icon already there -> updating an existing install
 install -Dm644 assets/ch57x-deck.svg "$ICON"
 
 # The launcher's Exec must not rely on ~/.local/bin being on the graphical
@@ -88,8 +89,15 @@ sed "s|^Exec=.*|Exec=$EXEC|" assets/ch57x-deck.desktop >"$DESKTOP"
 chmod 644 "$DESKTOP"
 command -v desktop-file-validate >/dev/null 2>&1 && desktop-file-validate "$DESKTOP" || true
 
+# Refresh the desktop/icon caches. Each tool covers a different environment and
+# is best-effort; a stale cache is why a reinstalled icon can look unchanged.
 update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
-gtk-update-icon-cache -q "$HOME/.local/share/icons/hicolor" 2>/dev/null || true
+gtk-update-icon-cache -qf "$HOME/.local/share/icons/hicolor" 2>/dev/null || true
+xdg-icon-resource forceupdate --theme hicolor 2>/dev/null || true
+# KDE Plasma keeps its own service/icon cache.
+for kb in kbuildsycoca6 kbuildsycoca5; do
+	if command -v "$kb" >/dev/null 2>&1; then "$kb" >/dev/null 2>&1 || true; break; fi
+done
 
 if ! command -v ch57x-keyboard-tool >/dev/null; then
 	echo
@@ -121,3 +129,9 @@ echo
 echo "Done! You can now:"
 echo "  - run 'ch57x-deck' in the terminal"
 echo "  - open \"CH57x Deck\" in the application menu"
+
+if [ -n "$REINSTALL" ]; then
+	echo
+	echo "Updated an existing install. If the menu icon still looks unchanged,"
+	echo "that's a desktop icon cache -- restart your panel or log out/in."
+fi

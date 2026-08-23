@@ -17,7 +17,11 @@ rm -f "$HOME/.local/share/icons/hicolor/scalable/apps/$DESKTOP_ID.svg"
 rm -f "$HOME/.local/share/applications/$DESKTOP_ID.desktop"
 rm -rf "$HOME/.local/share/ch57x_deck" # ch57x-keyboard-tool baixado automaticamente
 update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
-gtk-update-icon-cache -q "$HOME/.local/share/icons/hicolor" 2>/dev/null || true
+gtk-update-icon-cache -qf "$HOME/.local/share/icons/hicolor" 2>/dev/null || true
+xdg-icon-resource forceupdate --theme hicolor 2>/dev/null || true
+for kb in kbuildsycoca6 kbuildsycoca5; do
+	if command -v "$kb" >/dev/null 2>&1; then "$kb" >/dev/null 2>&1 || true; break; fi
+done
 $SUDO rm -f /etc/udev/rules.d/70-macropad-ch57x.rules
 $SUDO udevadm control --reload-rules 2>/dev/null || true
 
