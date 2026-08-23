@@ -71,7 +71,23 @@ python3 -m pip install --user .
 
 echo "==> Installing the icon and application menu entry"
 install -Dm644 assets/ch57x-deck.svg "$ICON"
-install -Dm644 assets/ch57x-deck.desktop "$DESKTOP"
+
+# The launcher's Exec must not rely on ~/.local/bin being on the graphical
+# session's PATH (GNOME/KDE/etc. often don't include it), or clicking the menu
+# entry silently does nothing. Point it at the absolute path pip created,
+# falling back to `python3 -m macropad` (python3 is always on PATH).
+USER_BASE=$(python3 -m site --user-base 2>/dev/null || echo "$HOME/.local")
+APP_BIN="$USER_BASE/bin/$DESKTOP_ID"
+if [ -x "$APP_BIN" ]; then
+	EXEC="$APP_BIN"
+else
+	EXEC="python3 -m macropad"
+fi
+mkdir -p "$(dirname "$DESKTOP")"
+sed "s|^Exec=.*|Exec=$EXEC|" assets/ch57x-deck.desktop >"$DESKTOP"
+chmod 644 "$DESKTOP"
+command -v desktop-file-validate >/dev/null 2>&1 && desktop-file-validate "$DESKTOP" || true
+
 update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
 gtk-update-icon-cache -q "$HOME/.local/share/icons/hicolor" 2>/dev/null || true
 
