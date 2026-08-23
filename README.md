@@ -65,9 +65,21 @@ variants:
 
 ## Installation
 
+One command (downloads the project and installs it):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/PericlesSavio/ch57x_deck/main/install.sh | sh
+```
+
+Or, from a clone of the repository:
+
 ```bash
 ./install.sh
 ```
+
+> Piping a script from the internet runs remote code without review. To
+> inspect it first, download it: `curl -fsSL .../install.sh -o install.sh`,
+> read it, then `sh install.sh`.
 
 Installs the app (pip, user-level, no root), the icon and application menu
 entry, and — asking first — the udev rule for USB access without root. Run

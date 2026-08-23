@@ -68,9 +68,21 @@ do chip CH57x:
 
 ## Instalação
 
+Num comando (baixa o projeto e instala):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/PericlesSavio/ch57x_deck/main/install.sh | sh
+```
+
+Ou, a partir de um clone do repositório:
+
 ```bash
 ./install.sh
 ```
+
+> Rodar um script direto da internet executa código remoto sem revisão. Se
+> preferir conferir antes, baixe primeiro e leia: `curl -fsSL .../install.sh
+> -o install.sh`, revise, e então `sh install.sh`.
 
 Instala o app (pip, nível de usuário, sem root), o ícone e o atalho no menu
 de aplicativos e — perguntando antes — a regra udev para acesso USB sem

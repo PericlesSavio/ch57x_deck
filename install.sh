@@ -3,13 +3,40 @@
 # application menu entry and (optionally) the udev rule for USB access
 # without root.
 #
+# From a checkout:
 #   ./install.sh              install everything
 #   ./install.sh --uninstall  remove everything
+#
+# Straight from the internet (downloads the project first, then runs this):
+#   curl -fsSL https://raw.githubusercontent.com/PericlesSavio/ch57x_deck/main/install.sh | sh
 #
 # Run as a regular user; sudo is used only for the udev rule.
 set -e
 
-cd "$(dirname "$0")"
+REPO="PericlesSavio/ch57x_deck"
+BRANCH="main"
+
+# Directory holding this script — resolves to the cwd when piped (`curl | sh`).
+SCRIPT_DIR=$(cd -- "$(dirname -- "$0")" 2>/dev/null && pwd || true)
+
+# No checkout next to the script (piped install): fetch the project into a temp
+# dir and re-run the bundled install.sh from there. Non-editable pip install
+# means the temp copy is disposable once installed.
+if [ -z "$SCRIPT_DIR" ] || [ ! -f "$SCRIPT_DIR/pyproject.toml" ] \
+	|| [ ! -f "$SCRIPT_DIR/macropad/__main__.py" ]; then
+	echo "==> Downloading CH57x Deck ($REPO, branch $BRANCH)"
+	for cmd in curl tar; do
+		command -v "$cmd" >/dev/null || { echo "error: $cmd is required" >&2; exit 1; }
+	done
+	TMP=$(mktemp -d)
+	trap 'rm -rf "$TMP"' EXIT
+	curl -fsSL "https://codeload.github.com/$REPO/tar.gz/refs/heads/$BRANCH" \
+		| tar -xz -C "$TMP" --strip-components=1
+	sh "$TMP/install.sh" "$@"
+	exit $?
+fi
+
+cd "$SCRIPT_DIR"
 
 if [ "$(id -u)" = 0 ]; then
 	SUDO=""
