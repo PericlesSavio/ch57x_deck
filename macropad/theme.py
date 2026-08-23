@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Tema visual: paletas escura (Monokai) e clara, cantos retos em ambas.
 
 Cor viva só em detalhes pontuais (destaques, botões de risco/envio); o
@@ -323,8 +324,43 @@ QLabel[role="dangerIcon"] {{
 """
 
 
+# Valor salvo em settings quando o tema deve acompanhar o sistema operacional.
+THEME_SYSTEM = "system"
+# Default de fábrica: seguir o SO (cai em escuro se o Qt não souber informar).
+DEFAULT_SETTING = THEME_SYSTEM
+
+
+def detect_system_mode() -> str:
+    """'dark' ou 'light' conforme o esquema de cores do SO (Qt 6.5+).
+
+    Cai em DEFAULT_THEME (escuro) quando o Qt não sabe informar — Qt antigo,
+    plataforma sem suporte ou nenhum QApplication ainda criado.
+    """
+    from PySide6.QtCore import Qt
+    from PySide6.QtWidgets import QApplication
+
+    app = QApplication.instance()
+    if app is not None:
+        try:
+            scheme = app.styleHints().colorScheme()
+        except AttributeError:
+            scheme = None
+        if scheme == Qt.ColorScheme.Light:
+            return "light"
+        if scheme == Qt.ColorScheme.Dark:
+            return "dark"
+    return DEFAULT_THEME
+
+
+def resolve_mode(mode: str) -> str:
+    """Traduz o valor salvo ('system'/'dark'/'light') na paleta efetiva."""
+    if mode == THEME_SYSTEM:
+        return detect_system_mode()
+    return mode if mode in PALETTES else DEFAULT_THEME
+
+
 def stylesheet_for(mode: str) -> str:
-    return build_stylesheet(PALETTES.get(mode, DARK))
+    return build_stylesheet(PALETTES[resolve_mode(mode)])
 
 
 # Compatibilidade: quem só quer o tema padrão (escuro) continua funcionando.

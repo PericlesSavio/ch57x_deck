@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Janela principal: grade do macropad, camadas, editor e envio ao dispositivo."""
 
 from __future__ import annotations
@@ -12,7 +13,9 @@ from PySide6.QtWidgets import (
     QButtonGroup,
     QComboBox,
     QDialog,
+    QDialogButtonBox,
     QFileDialog,
+    QFormLayout,
     QFrame,
     QGraphicsDropShadowEffect,
     QGridLayout,
@@ -24,13 +27,14 @@ from PySide6.QtWidgets import (
     QPlainTextEdit,
     QPushButton,
     QSizePolicy,
+    QSpinBox,
     QStackedLayout,
     QTabBar,
     QVBoxLayout,
     QWidget,
 )
 
-from . import __version__, model, settings, theme
+from . import __version__, layouts, model, settings, theme
 from .action_editor import ActionEditor
 from .backend import Backend, config_dir
 from .i18n import LANGUAGES, current_language, set_language, tr
@@ -56,7 +60,7 @@ class MainWindow(QMainWindow):
         # Seleção atual: ("button", linha, coluna) ou ("knob", índice, slot)
         self.selection: tuple[str, int, int | str] | None = None
         self._dirty = False
-        self._theme_mode = settings.get("theme", theme.DEFAULT_THEME)
+        self._theme_mode = settings.get("theme", theme.DEFAULT_SETTING)
 
         self._build_menu()
         self._build_ui()
@@ -92,6 +96,7 @@ class MainWindow(QMainWindow):
 
         menu.addSeparator()
         yaml_action = QAction(tr("menu_view_yaml"), self)
+        yaml_action.setShortcut(QKeySequence("Ctrl+Y"))
         yaml_action.triggered.connect(self._show_yaml)
         menu.addAction(yaml_action)
 
@@ -103,15 +108,23 @@ class MainWindow(QMainWindow):
 
         view_menu = self.menuBar().addMenu(tr("menu_view"))
         self._test_area_action = QAction(tr("menu_toggle_test"), self)
+        self._test_area_action.setShortcut(QKeySequence("Ctrl+T"))
         self._test_area_action.setCheckable(True)
         self._test_area_action.setChecked(settings.get("show_test_area", False))
         self._test_area_action.toggled.connect(self._toggle_test_area)
         view_menu.addAction(self._test_area_action)
 
+        self._build_device_menu()
+        self._build_keyboard_menu()
+
         theme_menu = self.menuBar().addMenu(tr("menu_theme"))
         theme_group = QActionGroup(self)
         theme_group.setExclusive(True)
-        for mode, label_key in [("dark", "theme_dark"), ("light", "theme_light")]:
+        for mode, label_key in [
+            ("system", "theme_system"),
+            ("dark", "theme_dark"),
+            ("light", "theme_light"),
+        ]:
             action = QAction(tr(label_key), self)
             action.setCheckable(True)
             action.setChecked(mode == self._theme_mode)
@@ -132,9 +145,146 @@ class MainWindow(QMainWindow):
             lang_menu.addAction(action)
 
         help_menu = self.menuBar().addMenu(tr("menu_help"))
+        tool_action = QAction(tr("menu_tool"), self)
+        tool_action.triggered.connect(self._manage_tool)
+        help_menu.addAction(tool_action)
+        help_menu.addSeparator()
         about_action = QAction(tr("menu_about"), self)
+        about_action.setShortcut(QKeySequence.StandardKey.HelpContents)
         about_action.triggered.connect(self._show_about)
         help_menu.addAction(about_action)
+
+    def _build_device_menu(self) -> None:
+        """Menu 'Modelo': troca o layout entre as variantes 3/6/9/12/15."""
+        device_menu = self.menuBar().addMenu(tr("menu_device"))
+        self._variant_group = QActionGroup(self)
+        self._variant_group.setExclusive(True)
+
+        self._variant_actions: list[tuple[QAction, model.Variant]] = []
+        for variant in model.VARIANTS:
+            action = QAction(self._variant_label(variant), self)
+            action.setCheckable(True)
+            self._variant_group.addAction(action)
+            device_menu.addAction(action)
+            action.triggered.connect(
+                lambda _=False, v=variant: self._apply_variant(
+                    v.rows, v.columns, v.knobs
+                )
+            )
+            self._variant_actions.append((action, variant))
+
+        device_menu.addSeparator()
+        self._custom_action = QAction(tr("menu_custom_layout"), self)
+        self._custom_action.setCheckable(True)
+        self._variant_group.addAction(self._custom_action)
+        self._custom_action.triggered.connect(self._choose_custom_layout)
+        device_menu.addAction(self._custom_action)
+
+        self._sync_variant_checks()
+
+    def _variant_label(self, variant: model.Variant) -> str:
+        knobs = (
+            tr("knob_one")
+            if variant.knobs == 1
+            else tr("knob_many", n=variant.knobs)
+        )
+        label = tr("variant_summary", keys=variant.keys, knobs=knobs)
+        return f"{label}  {tr('variant_tested' if variant.tested else 'variant_untested')}"
+
+    def _current_layout(self) -> tuple[int, int, int]:
+        return (self.config.rows, self.config.columns, self.config.knob_count)
+
+    def _sync_variant_checks(self) -> None:
+        """Marca o preset que bate com o layout atual (ou 'Personalizado')."""
+        current = self._current_layout()
+        matched = False
+        for action, variant in self._variant_actions:
+            is_current = (variant.rows, variant.columns, variant.knobs) == current
+            action.setChecked(is_current)
+            matched = matched or is_current
+        self._custom_action.setChecked(not matched)
+
+    def _apply_variant(self, rows: int, columns: int, knobs: int) -> None:
+        """Reconfigura o layout e reconstrói a janela, preservando o resto."""
+        if self._current_layout() == (rows, columns, knobs):
+            self._sync_variant_checks()
+            return
+        self.config.rows = rows
+        self.config.columns = columns
+        self.config.knob_count = knobs
+        self.config.normalize()
+        self._autosave()
+        self._rebuild_window()
+
+    def _choose_custom_layout(self) -> None:
+        dialog = QDialog(self)
+        dialog.setWindowTitle(tr("dlg_custom_title"))
+        layout = QVBoxLayout(dialog)
+
+        note = QLabel(tr("custom_note"))
+        note.setProperty("role", "dim")
+        note.setWordWrap(True)
+        layout.addWidget(note)
+
+        form = QFormLayout()
+        rows = QSpinBox()
+        rows.setRange(1, 8)
+        rows.setValue(self.config.rows)
+        columns = QSpinBox()
+        columns.setRange(1, 8)
+        columns.setValue(self.config.columns)
+        knobs = QSpinBox()
+        knobs.setRange(0, 5)
+        knobs.setValue(self.config.knob_count)
+        form.addRow(tr("lbl_rows"), rows)
+        form.addRow(tr("lbl_columns"), columns)
+        form.addRow(tr("lbl_knobs"), knobs)
+        layout.addLayout(form)
+
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok
+            | QDialogButtonBox.StandardButton.Cancel
+        )
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        layout.addWidget(buttons)
+
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            self._apply_variant(rows.value(), columns.value(), knobs.value())
+        else:
+            # Cancelou: desfaz a marcação de 'Personalizado' feita pelo clique.
+            self._sync_variant_checks()
+
+    def _rebuild_window(self) -> None:
+        """Recria a janela a partir da config salva (novo layout/idioma),
+        preservando a geometria atual."""
+        new_window = MainWindow()
+        new_window.setGeometry(self.geometry())
+        new_window.show()
+        QApplication.instance()._main_window = new_window
+        self.close()
+
+    def _build_keyboard_menu(self) -> None:
+        """Menu 'Teclado': layout físico do teclado visual (ABNT2, AZERTY…)."""
+        kbd_menu = self.menuBar().addMenu(tr("menu_keyboard"))
+        group = QActionGroup(self)
+        group.setExclusive(True)
+        current = settings.get("keyboard_layout", layouts.DEFAULT_LAYOUT)
+        for layout_id in layouts.LAYOUT_ORDER:
+            action = QAction(tr(f"kbd_{layout_id}"), self)
+            action.setCheckable(True)
+            action.setChecked(layout_id == current)
+            group.addAction(action)
+            kbd_menu.addAction(action)
+            action.triggered.connect(
+                lambda _=False, lid=layout_id: self._change_keyboard_layout(lid)
+            )
+
+    def _change_keyboard_layout(self, layout_id: str) -> None:
+        # Só re-rotula o teclado visual (ao vivo) e persiste — nada de reconstruir
+        # a janela, então a seleção atual é preservada.
+        settings.save("keyboard_layout", layout_id)
+        self.editor.set_keyboard_layout(layout_id)
 
     def _build_ui(self) -> None:
         central = QWidget()
@@ -637,14 +787,16 @@ class MainWindow(QMainWindow):
         set_language(code)
         # Reconstrói a janela na nova língua, preservando config e geometria.
         self._autosave()
-        new_window = MainWindow()
-        new_window.setGeometry(self.geometry())
-        new_window.show()
-        QApplication.instance()._main_window = new_window
-        self.close()
+        self._rebuild_window()
+
+    def _manage_tool(self) -> None:
+        from .tool_manager import ToolManagerDialog
+
+        ToolManagerDialog(self.backend, self).exec()
+        self._refresh_device_status()
 
     def _show_about(self) -> None:
-        link_color = theme.PALETTES[self._theme_mode].ACCENT
+        link_color = theme.PALETTES[theme.resolve_mode(self._theme_mode)].ACCENT
         QMessageBox.about(
             self,
             tr("about_title"),

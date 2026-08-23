@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Preferências persistentes do app (~/.config/ch57x_deck/settings.json).
 
 O mesmo arquivo guarda a língua escolhida (ver i18n.py) e as opções de

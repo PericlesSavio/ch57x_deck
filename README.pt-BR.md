@@ -24,6 +24,27 @@ A unidade da foto é um macropad CH57x genérico com RGB, dois knobs e cabo
 USB destacável — esse tipo de dispositivo, vendido sob várias marcas
 diferentes, é o alvo do CH57x Deck.
 
+### Modelos suportados
+
+O menu **Modelo** troca o layout da interface entre as variantes genéricas
+do chip CH57x:
+
+| Modelo | Grade | Knobs | Situação |
+| --- | --- | --- | --- |
+| 3 teclas + 1 knob | 1 × 3 | 1 | ⚠ não testado |
+| 6 teclas + 1 knob | 2 × 3 | 1 | ⚠ não testado |
+| 9 teclas + 1 knob | 3 × 3 | 1 | ⚠ não testado |
+| **12 teclas + 2 knobs** | **3 × 4** | **2** | **✅ testado** |
+| 15 teclas + 2 knobs | 3 × 5 | 2 | ⚠ não testado |
+
+> **Aviso:** até agora só o modelo de **12 teclas + 2 knobs** foi testado com
+> hardware real — é o padrão ao abrir o app. As outras variantes já têm o
+> frontend pronto, mas ainda **não foram testadas**; o arranjo de linhas ×
+> colunas de cada uma é presumido. Se o preset não corresponder ao seu
+> dispositivo, ajuste linhas, colunas e número de knobs à mão em
+> **Modelo → Personalizado…**. Relatos de quem testou os demais modelos são
+> bem-vindos.
+
 ## Requisitos
 
 - Linux com systemd/udev (Fedora, Ubuntu/Debian, Arch, openSUSE…)
@@ -39,7 +60,11 @@ diferentes, é o alvo do CH57x Deck.
   wheel do pip.
 - `ch57x-keyboard-tool`: se não estiver no PATH, o próprio app oferece
   baixar a release oficial na primeira execução (para
-  `~/.local/share/ch57x_deck/bin`)
+  `~/.local/share/ch57x_deck/bin`). O download é **conferido por SHA-256**
+  contra um hash embutido antes de rodar — nunca executa um binário não
+  verificado. Em **Ajuda → Atualizar ch57x-keyboard-tool…** dá para ver a
+  versão instalada, (re)instalar a versão estável verificada e checar no
+  GitHub se saiu uma estável nova.
 
 ## Instalação
 
@@ -65,14 +90,15 @@ Se preferir fazer na mão, ou só quiser o comando `ch57x-deck` sem a
 integração com o desktop:
 
 ```bash
-pip install --user -e .
+pip install --user .
 ```
 
 Isso instala as dependências (PySide6, PyYAML) e cria o comando `ch57x-deck`
 em `~/.local/bin` (precisa estar no `PATH`, o que já é o padrão na maioria
-das distros). `-e` deixa o pacote "editável": alterações nos arquivos em
-`macropad/` valem na hora, sem reinstalar — útil durante desenvolvimento; para
-um uso puramente final tanto faz usar `-e` ou não.
+das distros). Como não é editável, a instalação não fica presa a este
+diretório — dá para apagar o clone depois. Para desenvolvimento, use
+`pip install --user -e .`: o `-e` deixa o pacote "editável", então alterações
+nos arquivos em `macropad/` valem na hora, sem reinstalar.
 
 <details>
 <summary>Ícone, atalho de menu e permissão USB, na mão</summary>
@@ -106,7 +132,10 @@ repositório com `python run.py`.
 1. Escolha a **camada** (o macropad tem 3, alternadas pelo botão lateral).
 2. Clique numa **tecla ou função de knob** na grade.
 3. Monte a ação no editor:
-   - **Teclado** — modificadores + tecla; até 5 passos encadeados (macro).
+   - **Teclado** — modificadores + tecla; até 5 passos encadeados (macro). O
+     layout físico do teclado visual (ABNT2, AZERTY, QWERTZ…) é escolhido no
+     menu **Teclado** — a tecla sempre grava a posição física (HID); é o
+     layout do seu sistema operacional que decide o caractere final.
    - **Mídia** — play/pause, volume etc. (o firmware não permite
      modificadores junto com mídia).
    - **Avançado** — expressão livre: mouse (`click(left)`, `wheel(-1)`),
@@ -119,20 +148,18 @@ YAML compatível com o `ch57x-keyboard-tool` puro.
 
 ## Planos futuros
 
-- **Suporte às variantes de 3/6/9/15 teclas e 0–3 knobs.** O backend
-  (ch57x-keyboard-tool) e o modelo YAML já aceitam qualquer geometria; falta a
-  interface reconstruir a grade quando a geometria muda e oferecer um menu
-  "Modelo do macropad" (a geometria não é detectável via USB). Hoje a UI
-  assume 3×4 + 2 knobs e abrir um YAML de outra geometria quebra
-  (`IndexError` em `_refresh_pad_labels`).
-- **Testes automatizados** (pytest) para `model.py` (serialização YAML) e
-  `keys.py` (validação de ações) — hoje a verificação é toda manual.
+- **Confirmar as variantes de 3/6/9/15 teclas com hardware real.** A interface
+  já reconstrói a grade e oferece o menu **Modelo** (a geometria não é
+  detectável via USB), mas só o modelo de 12 teclas + 2 knobs foi testado —
+  ver "Modelos suportados". O mesmo vale para os layouts de teclado além do
+  ABNT2 (menu **Teclado**): seguem o mapeamento padrão de cada layout, mas não
+  foram conferidos.
 - **Perfis nomeados.** Hoje só existe uma configuração autosalva
   (`current.yaml`); `Arquivo → Salvar/Abrir` cobre import/export manual, mas
   não uma troca rápida entre perfis (ex.: "Trabalho" vs. "Jogo") direto no
   menu.
-- **Escolher uma licença** antes de publicar o repositório publicamente —
-  ainda não definida.
+- **Empacotamento para as distros** (`.deb`/`.rpm`/PKGBUILD ou Flatpak),
+  além do `install.sh` a partir do fonte que já existe.
 
 ### Limitação conhecida (não é possível hoje)
 
@@ -148,16 +175,37 @@ localmente.
 | `macropad/model.py` | Config em memória + (de)serialização YAML |
 | `macropad/keys.py` | Catálogo de teclas/modificadores do firmware |
 | `macropad/backend.py` | Chama o ch57x-keyboard-tool; detecta USB via sysfs |
+| `macropad/tool_manager.py` | Diálogo de instalar/atualizar o binário (verifica SHA-256) |
 | `macropad/action_editor.py` | Widget de edição de uma ação |
 | `macropad/keyboard_widget.py` | Teclado visual clicável |
+| `macropad/layouts.py` | Layouts físicos do teclado (ABNT2, AZERTY…) |
 | `macropad/test_area.py` | Área de teste (captura o que o pad envia) |
 | `macropad/main_window.py` | Janela principal |
 | `macropad/i18n.py` | Traduções (pt-BR, en, es) |
 | `macropad/settings.py` | Preferências persistentes |
-| `macropad/theme.py` | Tema Monokai (cinza escuro, cantos retos) |
+| `macropad/theme.py` | Tema Monokai + claro; segue o tema do sistema |
+| `tests/` | Testes de lógica pura (pytest, sem hardware nem Qt) |
 | `udev/70-macropad-ch57x.rules` | Regra de permissão USB |
 | `pyproject.toml` | Empacotamento; gera o comando `ch57x-deck` |
 | `assets/ch57x-deck.svg` | Ícone do app (paleta do `theme.py`) |
 | `assets/ch57x-deck.desktop` | Atalho para o menu de aplicativos |
 | `install.sh` | Instalação/remoção num passo só (`--uninstall`) |
 | `packaging/ch57x-deck-uninstall` | Desinstalação autocontida, chamada por `install.sh --uninstall` |
+| `scripts/pin_release.py` | Manutenção: fixa o SHA-256 de uma nova versão estável do binário |
+| `LICENSE` | Texto da GPL-3.0 |
+
+## Testes
+
+Os testes cobrem a lógica pura (modelo/YAML, teclas, layouts, traduções,
+tema) — sem hardware nem interface gráfica:
+
+```bash
+pip install --user '.[dev]'   # instala o pytest
+pytest
+```
+
+## Licença
+
+[GPL-3.0-or-later](LICENSE). O CH57x Deck fala com o macropad **apenas** pelo
+`ch57x-keyboard-tool`, chamando-o como subprocesso (sem linkar o código dele),
+então essa escolha de licença não impõe nada a esse projeto separado.

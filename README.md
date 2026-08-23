@@ -23,6 +23,26 @@ The pictured unit is a generic RGB CH57x macropad with two knobs and a
 detachable USB cable — this kind of device, sold under many different
 brand names, is what CH57x Deck targets.
 
+### Supported models
+
+The **Model** menu switches the interface layout between the generic CH57x
+variants:
+
+| Model | Grid | Knobs | Status |
+| --- | --- | --- | --- |
+| 3 keys + 1 knob | 1 × 3 | 1 | ⚠ untested |
+| 6 keys + 1 knob | 2 × 3 | 1 | ⚠ untested |
+| 9 keys + 1 knob | 3 × 3 | 1 | ⚠ untested |
+| **12 keys + 2 knobs** | **3 × 4** | **2** | **✅ tested** |
+| 15 keys + 2 knobs | 3 × 5 | 2 | ⚠ untested |
+
+> **Note:** so far only the **12-key + 2-knob** model has been tested on real
+> hardware — it is the default when the app opens. The other variants already
+> have a working frontend but are **untested**; each one's rows × columns
+> arrangement is assumed. If a preset doesn't match your device, adjust rows,
+> columns and knob count by hand in **Model → Custom…**. Reports from anyone
+> who tries the other models are welcome.
+
 ## Requirements
 
 - Linux with systemd/udev (Fedora, Ubuntu/Debian, Arch, openSUSE…)
@@ -37,7 +57,11 @@ brand names, is what CH57x Deck targets.
   it'll detect and reuse that copy instead of pulling the pip wheel.
 - `ch57x-keyboard-tool`: if it's not on the PATH, the app itself offers to
   download the official release on first run (into
-  `~/.local/share/ch57x_deck/bin`)
+  `~/.local/share/ch57x_deck/bin`). The download is **checked by SHA-256**
+  against an embedded hash before running — it never executes an unverified
+  binary. Under **Help → Update ch57x-keyboard-tool…** you can see the
+  installed version, (re)install the verified stable version and check GitHub
+  for a newer stable release.
 
 ## Installation
 
@@ -63,14 +87,15 @@ If you'd rather do it by hand, or just want the `ch57x-deck` command
 without desktop integration:
 
 ```bash
-pip install --user -e .
+pip install --user .
 ```
 
 This installs the dependencies (PySide6, PyYAML) and creates the
 `ch57x-deck` command in `~/.local/bin` (needs to be on `PATH`, which is the
-default on most distros). `-e` makes the package "editable": changes to
-files under `macropad/` take effect immediately, no reinstall needed —
-useful during development; for a purely end-user install, either way works.
+default on most distros). Since it isn't editable, the install isn't tied to
+this directory — you can delete the clone afterwards. For development, use
+`pip install --user -e .`: `-e` makes the package "editable", so changes to
+files under `macropad/` take effect immediately, no reinstall needed.
 
 <details>
 <summary>Icon, menu entry and USB permission, by hand</summary>
@@ -104,7 +129,11 @@ from the repository with `python run.py`.
 1. Pick the **layer** (the macropad has 3, switched with the side button).
 2. Click a **key or knob function** on the grid.
 3. Build the action in the editor:
-   - **Keyboard** — modifiers + key; up to 5 chained steps (macro).
+   - **Keyboard** — modifiers + key; up to 5 chained steps (macro). The
+     physical layout of the visual keyboard (ABNT2, AZERTY, QWERTZ…) is
+     picked in the **Keyboard** menu — a key always records the physical
+     position (HID); it's your operating system's layout that decides the
+     final character.
    - **Media** — play/pause, volume, etc. (the firmware doesn't allow
      modifiers together with media keys).
    - **Advanced** — free-form expression: mouse (`click(left)`,
@@ -118,20 +147,18 @@ The last uploaded configuration is kept at
 
 ## Future plans
 
-- **Support for the 3/6/9/15-key and 0–3-knob variants.** The backend
-  (ch57x-keyboard-tool) and the YAML model already accept any geometry;
-  what's missing is the interface rebuilding the grid when the geometry
-  changes, plus a "Macropad model" menu (geometry isn't detectable over
-  USB). Today the UI assumes 3×4 + 2 knobs, and opening a YAML with a
-  different geometry breaks (`IndexError` in `_refresh_pad_labels`).
-- **Automated tests** (pytest) for `model.py` (YAML serialization) and
-  `keys.py` (action validation) — today all verification is manual.
+- **Confirm the 3/6/9/15-key variants on real hardware.** The interface
+  already rebuilds the grid and offers the **Model** menu (geometry isn't
+  detectable over USB), but only the 12-key + 2-knob model has been tested —
+  see "Supported models". The same applies to keyboard layouts beyond ABNT2
+  (**Keyboard** menu): they follow each layout's standard mapping but haven't
+  been verified.
 - **Named profiles.** Today there's only one autosaved configuration
   (`current.yaml`); `File → Save/Open` covers manual import/export, but not
   quickly switching between profiles (e.g. "Work" vs. "Gaming") from the
   menu.
-- **Pick a license** before publishing the repository publicly — not
-  decided yet.
+- **Distro packaging** (`.deb`/`.rpm`/PKGBUILD or Flatpak), beyond the
+  from-source `install.sh` that already exists.
 
 ### Known limitation (not currently possible)
 
@@ -147,16 +174,37 @@ from a locally saved YAML.
 | `macropad/model.py` | In-memory config + YAML (de)serialization |
 | `macropad/keys.py` | Catalog of the firmware's keys/modifiers |
 | `macropad/backend.py` | Calls ch57x-keyboard-tool; detects USB via sysfs |
+| `macropad/tool_manager.py` | Install/update dialog for the binary (verifies SHA-256) |
 | `macropad/action_editor.py` | Widget for editing one action |
 | `macropad/keyboard_widget.py` | Clickable visual keyboard |
+| `macropad/layouts.py` | Physical keyboard layouts (ABNT2, AZERTY…) |
 | `macropad/test_area.py` | Test area (captures what the pad sends) |
 | `macropad/main_window.py` | Main window |
 | `macropad/i18n.py` | Translations (pt-BR, en, es) |
 | `macropad/settings.py` | Persistent preferences |
-| `macropad/theme.py` | Monokai theme (dark gray, square corners) |
+| `macropad/theme.py` | Monokai + light theme; follows the system theme |
+| `tests/` | Pure-logic tests (pytest, no hardware or Qt) |
 | `udev/70-macropad-ch57x.rules` | USB permission rule |
 | `pyproject.toml` | Packaging; generates the `ch57x-deck` command |
 | `assets/ch57x-deck.svg` | App icon (matches `theme.py`'s palette) |
 | `assets/ch57x-deck.desktop` | Application menu shortcut |
 | `install.sh` | One-step install/uninstall (`--uninstall`) |
 | `packaging/ch57x-deck-uninstall` | Self-contained uninstall, run by `install.sh --uninstall` |
+| `scripts/pin_release.py` | Maintenance: pins the SHA-256 of a new stable binary release |
+| `LICENSE` | GPL-3.0 text |
+
+## Tests
+
+The tests cover the pure logic (model/YAML, keys, layouts, translations,
+theme) — no hardware or GUI:
+
+```bash
+pip install --user '.[dev]'   # installs pytest
+pytest
+```
+
+## License
+
+[GPL-3.0-or-later](LICENSE). CH57x Deck talks to the macropad **only**
+through `ch57x-keyboard-tool`, invoking it as a subprocess (without linking
+its code), so this license choice imposes nothing on that separate project.

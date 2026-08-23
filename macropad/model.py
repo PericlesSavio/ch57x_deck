@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Modelo de dados da configuração do macropad.
 
 Uma ação é guardada como string no mesmo dialeto que o firmware entende
@@ -24,6 +25,33 @@ ORIENTATION_LABELS = {
 }
 
 LAYER_COUNT = 3
+
+
+@dataclass(frozen=True)
+class Variant:
+    """Um modelo de macropad CH57x, em teclas × knobs.
+
+    As dimensões `rows`/`columns` são o arranjo físico presumido de cada
+    modelo genérico; só a variante de 12 teclas + 2 knobs foi testada com
+    hardware real (`tested=True`). Se um preset não bater com o seu
+    dispositivo, o layout pode ser ajustado à mão em "Personalizado…".
+    """
+
+    keys: int
+    rows: int
+    columns: int
+    knobs: int
+    tested: bool = False
+
+
+# Modelos genéricos mais comuns do chip CH57x (3/6/9/12/15 teclas com knobs).
+VARIANTS = [
+    Variant(keys=3, rows=1, columns=3, knobs=1),
+    Variant(keys=6, rows=2, columns=3, knobs=1),
+    Variant(keys=9, rows=3, columns=3, knobs=1),
+    Variant(keys=12, rows=3, columns=4, knobs=2, tested=True),
+    Variant(keys=15, rows=3, columns=5, knobs=2),
+]
 
 
 class ConfigError(ValueError):

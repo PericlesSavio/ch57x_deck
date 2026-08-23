@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Editor de uma ação de tecla/knob.
 
 Três modos:
@@ -124,6 +125,10 @@ class ActionEditor(QWidget):
     # ------------------------------------------------------------------
     # Estado -> widgets
     # ------------------------------------------------------------------
+
+    def set_keyboard_layout(self, layout_id: str) -> None:
+        """Re-rotula o teclado visual para o layout físico escolhido."""
+        self._kb.apply_layout(layout_id)
 
     def set_action(self, action: str) -> None:
         """Carrega uma ação existente e escolhe a aba adequada."""

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Teclado visual clicável para escolher a combinação de teclas.
 
 Desenha um teclado completo (fileira F, F13–F24, bloco principal, navegação e
@@ -13,6 +14,7 @@ from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QGridLayout, QPushButton, QSizePolicy, QWidget
 
 from . import keys as keycat
+from . import layouts, settings
 
 # Unidade de largura: 1u = 4 colunas do grid (permite larguras de 0.25u).
 _U = 4
@@ -121,6 +123,8 @@ class KeyboardWidget(QWidget):
         self._selected: str | None = None
         self._mod_buttons: dict[str, QPushButton] = {}
         self._key_buttons: dict[str, QPushButton] = {}
+        # Rótulo US original de cada botão, base para reaplicar layouts.
+        self._default_labels: dict[str, str] = {}
 
         # O teclado absorve o espaço vertical disponível na aba.
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -145,6 +149,9 @@ class KeyboardWidget(QWidget):
         for r in range(len(_ROWS)):
             grid.setRowStretch(r, 1)
 
+        # Abre já no layout físico salvo (ABNT2, AZERTY…); US por padrão.
+        self.apply_layout(settings.get("keyboard_layout", layouts.DEFAULT_LAYOUT))
+
     def _add_key(
         self, grid: QGridLayout, row: int, col: int, span: int, name: str, label: str
     ) -> None:
@@ -154,6 +161,7 @@ class KeyboardWidget(QWidget):
         btn.setMinimumHeight(30)
         btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         btn.setToolTip(name)
+        self._default_labels[name] = label
         if name in keycat.MODIFIERS:
             btn.toggled.connect(self._modifier_toggled)
             self._mod_buttons[name] = btn
@@ -161,6 +169,17 @@ class KeyboardWidget(QWidget):
             btn.clicked.connect(lambda _=False, n=name: self._key_clicked(n))
             self._key_buttons[name] = btn
         grid.addWidget(btn, row, col, 1, span)
+
+    def apply_layout(self, layout_id: str) -> None:
+        """Re-rotula os botões conforme o layout físico, sem mudar os nomes HID.
+
+        Só a etiqueta muda; o que a tecla grava (o nome no dialeto do firmware)
+        continua sendo a posição física — é o layout do sistema operacional que
+        decide o caractere final.
+        """
+        overrides = layouts.labels_for(layout_id)
+        for name, btn in self._key_buttons.items():
+            btn.setText(overrides.get(name, self._default_labels[name]))
 
     # ------------------------------------------------------------------
     # Interação

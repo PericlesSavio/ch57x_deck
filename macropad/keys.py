@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Catálogo das teclas, modificadores e ações aceitas pelo firmware CH57x.
 
 A lista espelha a saída de `ch57x-keyboard-tool show-keys` (v1.7.0). Ela é usada

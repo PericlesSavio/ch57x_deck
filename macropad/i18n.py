@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Internacionalização: pt-BR (padrão), inglês e espanhol.
 
 Sem dependência do sistema de .qm do Qt — um dicionário simples cobre o app
@@ -45,8 +46,85 @@ STRINGS: dict[str, dict[str, str]] = {
         "en": "&Test area",
         "es": "Área de &prueba",
     },
+    "menu_device": {"pt_BR": "&Modelo", "en": "&Model", "es": "&Modelo"},
+    "variant_summary": {
+        "pt_BR": "{keys} teclas · {knobs}",
+        "en": "{keys} keys · {knobs}",
+        "es": "{keys} teclas · {knobs}",
+    },
+    "knob_one": {"pt_BR": "1 knob", "en": "1 knob", "es": "1 knob"},
+    "knob_many": {"pt_BR": "{n} knobs", "en": "{n} knobs", "es": "{n} knobs"},
+    "variant_tested": {
+        "pt_BR": "(testado)",
+        "en": "(tested)",
+        "es": "(probado)",
+    },
+    "variant_untested": {
+        "pt_BR": "(não testado)",
+        "en": "(untested)",
+        "es": "(no probado)",
+    },
+    "menu_custom_layout": {
+        "pt_BR": "Personalizado…",
+        "en": "Custom…",
+        "es": "Personalizado…",
+    },
+    "dlg_custom_title": {
+        "pt_BR": "Layout personalizado",
+        "en": "Custom layout",
+        "es": "Diseño personalizado",
+    },
+    "custom_note": {
+        "pt_BR": (
+            "Ajuste o arranjo do seu macropad. Só o modelo de 12 teclas + "
+            "2 knobs foi testado; os demais são presumidos."
+        ),
+        "en": (
+            "Adjust your macropad's layout. Only the 12-key + 2-knob model "
+            "has been tested; the others are assumed."
+        ),
+        "es": (
+            "Ajuste la distribución de su macropad. Solo el modelo de 12 "
+            "teclas + 2 knobs fue probado; los demás son supuestos."
+        ),
+    },
+    "lbl_rows": {"pt_BR": "Linhas", "en": "Rows", "es": "Filas"},
+    "lbl_columns": {"pt_BR": "Colunas", "en": "Columns", "es": "Columnas"},
+    "lbl_knobs": {"pt_BR": "Knobs", "en": "Knobs", "es": "Knobs"},
+    "menu_keyboard": {"pt_BR": "&Teclado", "en": "&Keyboard", "es": "&Teclado"},
+    "kbd_us": {
+        "pt_BR": "US / Internacional (padrão)",
+        "en": "US / International (default)",
+        "es": "US / Internacional (predeterminado)",
+    },
+    "kbd_abnt2": {
+        "pt_BR": "ABNT2 (Brasil)",
+        "en": "ABNT2 (Brazil)",
+        "es": "ABNT2 (Brasil)",
+    },
+    "kbd_es": {
+        "pt_BR": "Espanhol (Espanha)",
+        "en": "Spanish (Spain)",
+        "es": "Español (España)",
+    },
+    "kbd_fr": {
+        "pt_BR": "Francês (AZERTY)",
+        "en": "French (AZERTY)",
+        "es": "Francés (AZERTY)",
+    },
+    "kbd_de": {
+        "pt_BR": "Alemão (QWERTZ)",
+        "en": "German (QWERTZ)",
+        "es": "Alemán (QWERTZ)",
+    },
+    "kbd_uk": {
+        "pt_BR": "Reino Unido (UK)",
+        "en": "United Kingdom (UK)",
+        "es": "Reino Unido (UK)",
+    },
     "menu_language": {"pt_BR": "&Idioma", "en": "&Language", "es": "&Idioma"},
     "menu_theme": {"pt_BR": "&Tema", "en": "&Theme", "es": "&Tema"},
+    "theme_system": {"pt_BR": "Sistema", "en": "System", "es": "Sistema"},
     "theme_dark": {"pt_BR": "Escuro", "en": "Dark", "es": "Oscuro"},
     "theme_light": {"pt_BR": "Claro", "en": "Light", "es": "Claro"},
     "menu_help": {"pt_BR": "A&juda", "en": "&Help", "es": "Ay&uda"},
@@ -96,17 +174,22 @@ STRINGS: dict[str, dict[str, str]] = {
     "kb_hint": {
         "pt_BR": (
             "Clique nos modificadores (Ctrl, Shift…) e numa tecla para montar "
-            "a combinação. Layout US — no ABNT2 alguns símbolos mudam de lugar "
-            "(ex.: o Ç fica na tecla ;)."
+            "a combinação. O teclado mostra o layout escolhido no menu Teclado; "
+            "o macropad grava a posição física (HID) da tecla — o caractere "
+            "final depende do layout ativo no sistema operacional."
         ),
         "en": (
             "Click the modifiers (Ctrl, Shift…) and a key to build the combo. "
-            "US layout — on other layouts some symbols sit elsewhere."
+            "The keyboard shows the layout picked in the Keyboard menu; the "
+            "macropad records the physical key position (HID) — the final "
+            "character depends on the layout active in the operating system."
         ),
         "es": (
             "Haga clic en los modificadores (Ctrl, Shift…) y en una tecla para "
-            "armar la combinación. Distribución US — en otras distribuciones "
-            "algunos símbolos cambian de lugar."
+            "armar la combinación. El teclado muestra la distribución elegida "
+            "en el menú Teclado; el macropad graba la posición física (HID) de "
+            "la tecla — el carácter final depende de la distribución activa en "
+            "el sistema operativo."
         ),
     },
     "chord_tooltip": {
@@ -261,6 +344,110 @@ STRINGS: dict[str, dict[str, str]] = {
         "pt_BR": "Falha ao instalar",
         "en": "Installation failed",
         "es": "Fallo al instalar",
+    },
+
+    # --- Gerenciador do ch57x-keyboard-tool ------------------------------
+    "menu_tool": {
+        "pt_BR": "Atualizar ch57x-keyboard-tool…",
+        "en": "Update ch57x-keyboard-tool…",
+        "es": "Actualizar ch57x-keyboard-tool…",
+    },
+    "tool_title": {
+        "pt_BR": "ch57x-keyboard-tool",
+        "en": "ch57x-keyboard-tool",
+        "es": "ch57x-keyboard-tool",
+    },
+    "tool_info": {
+        "pt_BR": (
+            "Baixa o binário do release oficial e confere o SHA-256 antes de "
+            "usar — nunca executa um download não verificado. É este binário "
+            "que grava no macropad."
+        ),
+        "en": (
+            "Downloads the binary from the official release and checks its "
+            "SHA-256 before use — it never runs an unverified download. This "
+            "binary is what writes to the macropad."
+        ),
+        "es": (
+            "Descarga el binario del release oficial y verifica su SHA-256 "
+            "antes de usarlo — nunca ejecuta una descarga sin verificar. Este "
+            "binario es el que graba en el macropad."
+        ),
+    },
+    "tool_installed": {
+        "pt_BR": "Instalada: {version}",
+        "en": "Installed: {version}",
+        "es": "Instalada: {version}",
+    },
+    "tool_not_installed": {
+        "pt_BR": "Nenhuma versão instalada.",
+        "en": "No version installed.",
+        "es": "Ninguna versión instalada.",
+    },
+    "tool_stable": {
+        "pt_BR": "Versão estável verificada: {version}",
+        "en": "Verified stable version: {version}",
+        "es": "Versión estable verificada: {version}",
+    },
+    "tool_install": {
+        "pt_BR": "Instalar/atualizar para {version}",
+        "en": "Install/update to {version}",
+        "es": "Instalar/actualizar a {version}",
+    },
+    "tool_check_online": {
+        "pt_BR": "Procurar versão nova online",
+        "en": "Check for a new version online",
+        "es": "Buscar versión nueva en línea",
+    },
+    "tool_close": {"pt_BR": "Fechar", "en": "Close", "es": "Cerrar"},
+    "tool_downloading": {
+        "pt_BR": "Baixando e verificando {version}…",
+        "en": "Downloading and verifying {version}…",
+        "es": "Descargando y verificando {version}…",
+    },
+    "tool_checking": {
+        "pt_BR": "Consultando o GitHub…",
+        "en": "Checking GitHub…",
+        "es": "Consultando GitHub…",
+    },
+    "tool_ok": {
+        "pt_BR": "{version} instalada e verificada.",
+        "en": "{version} installed and verified.",
+        "es": "{version} instalada y verificada.",
+    },
+    "tool_failed": {
+        "pt_BR": "Falhou: {msg}",
+        "en": "Failed: {msg}",
+        "es": "Falló: {msg}",
+    },
+    "tool_offline": {
+        "pt_BR": "Não foi possível consultar o GitHub (sem conexão?).",
+        "en": "Could not reach GitHub (offline?).",
+        "es": "No se pudo consultar GitHub (¿sin conexión?).",
+    },
+    "tool_uptodate": {
+        "pt_BR": "Você já está na versão estável mais recente ({version}).",
+        "en": "You're already on the latest stable version ({version}).",
+        "es": "Ya está en la versión estable más reciente ({version}).",
+    },
+    "tool_available_known": {
+        "pt_BR": "{version} disponível — clique em Instalar/atualizar.",
+        "en": "{version} available — click Install/update.",
+        "es": "{version} disponible — pulse Instalar/actualizar.",
+    },
+    "tool_app_outdated": {
+        "pt_BR": (
+            "Saiu a versão estável {version}, mas o CH57x Deck ainda não a "
+            "verifica. Atualize o CH57x Deck para instalá-la com segurança."
+        ),
+        "en": (
+            "Stable version {version} is out, but CH57x Deck can't verify it "
+            "yet. Update CH57x Deck to install it safely."
+        ),
+        "es": (
+            "Salió la versión estable {version}, pero CH57x Deck aún no la "
+            "verifica. Actualice CH57x Deck para instalarla con seguridad."
+        ),
     },
     "dev_absent": {
         "pt_BR": "⚠ Macropad não detectado (USB 1189)",
@@ -451,6 +638,7 @@ STRINGS: dict[str, dict[str, str]] = {
             "configuração do macropad numa interface visual e delega a esse "
             "binário toda a comunicação USB (validação e gravação no "
             "firmware do dispositivo).</p>"
+            "<p>Licença: <b>GPL-3.0-or-later</b>.</p>"
         ),
         "en": (
             "<h3>CH57x Deck</h3>"
@@ -462,6 +650,7 @@ STRINGS: dict[str, dict[str, str]] = {
             "macropad configuration in a visual interface and delegates all "
             "USB communication (validation and writing to the device "
             "firmware) to that binary.</p>"
+            "<p>License: <b>GPL-3.0-or-later</b>.</p>"
         ),
         "es": (
             "<h3>CH57x Deck</h3>"
@@ -473,6 +662,7 @@ STRINGS: dict[str, dict[str, str]] = {
             "configuración del macropad en una interfaz visual y delega en "
             "ese binario toda la comunicación USB (validación y grabación "
             "en el firmware del dispositivo).</p>"
+            "<p>Licencia: <b>GPL-3.0-or-later</b>.</p>"
         ),
     },
 }

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Área de teste: captura e exibe o que o macropad envia de fato.
 
 O usuário clica no campo e aperta as teclas físicas; cada evento recebido

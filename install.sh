@@ -37,7 +37,10 @@ if ! python3 -m pip --version >/dev/null 2>&1; then
 fi
 
 echo "==> Installing CH57x Deck (pip, user-level, no root)"
-python3 -m pip install --user -e .
+# Not editable: the package is copied into the user site, so the install no
+# longer depends on this checkout staying in place. (Use 'pip install --user
+# -e .' by hand for a development install that tracks the source tree.)
+python3 -m pip install --user .
 
 echo "==> Installing the icon and application menu entry"
 install -Dm644 assets/ch57x-deck.svg "$ICON"
