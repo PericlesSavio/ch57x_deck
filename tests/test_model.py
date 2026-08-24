@@ -62,6 +62,23 @@ def test_trailing_empty_layers_are_pruned():
     assert len(dumped["layers"]) == 1
 
 
+def test_disable_empty_sends_zero_code_and_keeps_all_layers():
+    config = model.default_config()  # camada 1 = F13–F24, camadas 2/3 vazias
+    config.set(0, 0, 0, "")  # limpa K1
+    dumped = config.to_yaml_dict(disable_empty=True)
+    # tecla vazia vira <0> (o upload grava e desativa, em vez de pular null)
+    assert dumped["layers"][0]["buttons"][0][0] == "<0>"
+    # nenhuma camada omitida — todas gravadas
+    assert len(dumped["layers"]) == model.LAYER_COUNT
+    assert dumped["layers"][1]["buttons"][0][0] == "<0>"
+
+
+def test_default_mode_still_uses_null():
+    config = model.Config(rows=1, columns=2, knob_count=0)
+    config.set(0, 0, 0, "a")
+    assert config.to_yaml_dict()["layers"][0]["buttons"][0] == ["a", None]
+
+
 def test_resize_preserves_existing_cells():
     config = model.Config(rows=3, columns=4, knob_count=2)
     config.set(0, 0, 0, "a")

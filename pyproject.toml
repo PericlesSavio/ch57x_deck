@@ -37,5 +37,8 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 packages = ["macropad"]
 
+[tool.setuptools.package-data]
+macropad = ["locales/*.yaml"]
+
 [tool.setuptools.dynamic]
 version = { attr = "macropad.__version__" }

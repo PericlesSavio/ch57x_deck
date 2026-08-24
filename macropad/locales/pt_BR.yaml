@@ -1,0 +1,163 @@
+# CH57x Deck — traduções para o Português (Brasil).
+#
+# To add a language: copy en.yaml to <code>.yaml (e.g. fr.yaml, de.yaml),
+# register the code in macropad/i18n.py (LANGUAGES) and translate only the
+# VALUES to the right of the colons. Do NOT change the keys, the fields in
+# braces ({version}, {n}…) or the HTML markup (<b>, <a href=…>).
+# The '&' before a letter marks a menu accelerator (you may move it).
+
+app_title: CH57x Deck — Configurador de Macropad
+menu_file: '&Arquivo'
+menu_open: '&Abrir YAML…'
+menu_save: '&Salvar YAML…'
+menu_quit: Sai&r
+menu_edit: '&Editar'
+edit_undo: Desfazer
+edit_redo: Refazer
+edit_copy_action: Copiar ação
+edit_paste_action: Colar ação
+edit_copy_layer: Copiar camada atual para
+status_action_copied: Ação copiada.
+status_action_pasted: Ação colada.
+status_layer_copied: Camada {src} copiada para a camada {dest}.
+menu_view_yaml: '&Ver YAML…'
+menu_view: E&xibir
+menu_toggle_test: Área de &teste
+menu_device: '&Modelo'
+variant_summary: '{keys} teclas · {knobs}'
+knob_one: 1 knob
+knob_many: '{n} knobs'
+variant_tested: (testado)
+variant_untested: (não testado)
+menu_custom_layout: Personalizado…
+dlg_custom_title: Layout personalizado
+custom_note: Ajuste o arranjo do seu macropad. Só o modelo de 12 teclas + 2 knobs foi testado; os demais
+  são presumidos.
+lbl_rows: Linhas
+lbl_columns: Colunas
+lbl_knobs: Knobs
+menu_keyboard: '&Teclado'
+kbd_us: US / Internacional (padrão)
+kbd_abnt2: ABNT2 (Brasil)
+kbd_es: Espanhol (Espanha)
+kbd_fr: Francês (AZERTY)
+kbd_de: Alemão (QWERTZ)
+kbd_uk: Reino Unido (UK)
+menu_language: '&Idioma'
+menu_theme: '&Tema'
+theme_system: Sistema
+theme_dark: Escuro
+theme_light: Claro
+menu_help: A&juda
+menu_about: '&Sobre…'
+layer_tab: Camada {n}
+group_keys: Teclas
+group_knobs: Knobs
+knob_n: Knob {n}
+knob_ccw: Girar ⟲
+knob_press: Apertar
+knob_cw: Girar ⟳
+group_action: Ação da seleção
+group_yaml: YAML gerado
+sel_button: Tecla {label}  (camada {layer})
+sel_knob: Knob {n} — {slot}  (camada {layer})
+tab_keyboard: Teclado
+tab_media: Mídia
+tab_advanced: Avançado
+combo_none: — nenhuma —
+btn_add_step: Adicionar passo à macro
+btn_remove_step: Remover passo selecionado
+btn_clear: Limpar tecla
+kb_hint: Clique nos modificadores (Ctrl, Shift…) e numa tecla para montar a combinação. O teclado mostra
+  o layout escolhido no menu Teclado; o macropad grava a posição física (HID) da tecla — o caractere final
+  depende do layout ativo no sistema operacional.
+chord_tooltip: Passos executados em sequência num único aperto (máx. 5).
+media_hint: Teclas de mídia não aceitam modificadores nem macro.
+adv_placeholder: 'ex.: ctrl-alt-t  |  click(left)  |  <110>'
+adv_hint: 'Expressão livre no dialeto do firmware.
+
+  Mouse: click(left), wheel(-1), move(5,0), drag(left,0,5)
+
+  Código bruto: <110>   Macro: ctrl-c,ctrl-v
+
+
+  O macropad só envia teclas — ele não executa comandos.
+
+  Para abrir um programa, mapeie uma tecla F13–F24 aqui e crie
+
+  um atalho de sistema (KDE/GNOME) que rode o comando.'
+group.letters: Letras
+group.digits: Números
+group.function: Função
+group.navigation: Navegação
+group.punct: Pontuação e controle
+group.numpad: Teclado numérico
+group.misc: Diversos
+group_test: Área de teste
+test_placeholder: Clique aqui e aperte as teclas do macropad…
+test_hint: Mostra o que cada tecla envia ao sistema. Teclas de mídia/volume podem ser capturadas pelo
+  desktop antes de chegar aqui.
+btn_clear_log: Limpar
+btn_validate: Validar
+btn_upload: Enviar ao macropad
+status_ready: Pronto.
+status_valid: Configuração válida.
+status_uploaded: Enviado ao macropad com sucesso.
+status_opened: 'Aberto: {name}'
+status_saved: 'Salvo: {name}'
+dev_no_tool: ⚠ ch57x-keyboard-tool não encontrado
+overlay_install_title: Ferramenta necessária
+overlay_install_body: O CH57x Deck precisa do ch57x-keyboard-tool para se comunicar com o macropad. Ele
+  ainda não foi encontrado neste computador.
+btn_install_tool: Instalar
+btn_installing: Instalando…
+status_tool_installed: ch57x-keyboard-tool instalado com sucesso.
+dlg_install_fail: Falha ao instalar
+dev_absent: ⚠ Macropad não detectado (USB 1189)
+dev_connected: ● Macropad conectado
+dev_no_access: ⚠ Macropad detectado, mas sem permissão USB
+dlg_open_title: Abrir configuração
+dlg_save_title: Salvar configuração
+dlg_open_error: Erro ao abrir
+dlg_invalid: Configuração inválida
+dlg_upload_fail: Falha no envio
+udev_hint: '
+
+
+  Sem permissão no USB. Instale a regra udev:
+
+  sudo cp udev/70-macropad-ch57x.rules /etc/udev/rules.d/
+
+  sudo udevadm control --reload-rules && sudo udevadm trigger'
+dlg_perm_title: Permissão USB
+dlg_perm_text: 'O macropad foi detectado, mas seu usuário ainda não tem permissão para gravar nele.
+
+
+  Instalar agora a regra de sistema (udev) que libera o acesso? A senha de administrador será pedida uma
+  única vez.'
+btn_install_rule: Instalar agora
+btn_later: Depois
+perm_ok: Permissão USB configurada com sucesso.
+perm_replug: Regra instalada, mas o acesso ainda não liberou. Desconecte e reconecte o macropad.
+perm_fail: 'A instalação da regra falhou:
+
+  {msg}'
+invalid_action_button: A ação “{action}” na tecla {label} (camada {layer}) não é uma tecla válida do firmware.
+invalid_action_knob: A ação “{action}” no knob {n} ({slot}, camada {layer}) não é válida para o firmware.
+invalid_action_hint: 'O macropad só envia teclas — ele não abre programas nem executa comandos.
+
+
+  Para abrir um programa (ex.: kcalc):
+
+  1. Mapeie esta tecla como F13–F24 (aba Teclado → grupo Função) e envie ao macropad.
+
+  2. No KDE: Configurações do Sistema → Teclado → Atalhos → Adicionar novo → Comando ou script… → digite
+  o comando.
+
+  3. No atalho criado, aperte a tecla física do macropad.'
+yaml_filter: YAML (*.yaml *.yml)
+about_title: Sobre o CH57x Deck
+about_text: '<h3>CH57x Deck</h3><p>Versão {version}</p><p>Criado por <b>Péricles Sávio</b>.</p><p>Frontend
+  gráfico para o <a href=''https://github.com/kriomant/ch57x-keyboard-tool'' style=''color:{link_color}''>ch57x-keyboard-tool</a>:
+  monta a configuração do macropad numa interface visual e delega a esse binário toda a comunicação USB
+  (validação e gravação no firmware do dispositivo).</p><p>Licença: <b>GPL-3.0-or-later</b>.</p>'

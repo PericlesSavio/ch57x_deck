@@ -1,0 +1,164 @@
+# CH57x Deck — traducciones al Español.
+#
+# To add a language: copy en.yaml to <code>.yaml (e.g. fr.yaml, de.yaml),
+# register the code in macropad/i18n.py (LANGUAGES) and translate only the
+# VALUES to the right of the colons. Do NOT change the keys, the fields in
+# braces ({version}, {n}…) or the HTML markup (<b>, <a href=…>).
+# The '&' before a letter marks a menu accelerator (you may move it).
+
+app_title: CH57x Deck — Configurador de Macropad
+menu_file: '&Archivo'
+menu_open: '&Abrir YAML…'
+menu_save: '&Guardar YAML…'
+menu_quit: Sali&r
+menu_edit: '&Editar'
+edit_undo: Deshacer
+edit_redo: Rehacer
+edit_copy_action: Copiar acción
+edit_paste_action: Pegar acción
+edit_copy_layer: Copiar capa actual a
+status_action_copied: Acción copiada.
+status_action_pasted: Acción pegada.
+status_layer_copied: Capa {src} copiada a la capa {dest}.
+menu_view_yaml: '&Ver YAML…'
+menu_view: '&Mostrar'
+menu_toggle_test: Área de &prueba
+menu_device: '&Modelo'
+variant_summary: '{keys} teclas · {knobs}'
+knob_one: 1 knob
+knob_many: '{n} knobs'
+variant_tested: (probado)
+variant_untested: (no probado)
+menu_custom_layout: Personalizado…
+dlg_custom_title: Diseño personalizado
+custom_note: Ajuste la distribución de su macropad. Solo el modelo de 12 teclas + 2 knobs fue probado;
+  los demás son supuestos.
+lbl_rows: Filas
+lbl_columns: Columnas
+lbl_knobs: Knobs
+menu_keyboard: '&Teclado'
+kbd_us: US / Internacional (predeterminado)
+kbd_abnt2: ABNT2 (Brasil)
+kbd_es: Español (España)
+kbd_fr: Francés (AZERTY)
+kbd_de: Alemán (QWERTZ)
+kbd_uk: Reino Unido (UK)
+menu_language: '&Idioma'
+menu_theme: '&Tema'
+theme_system: Sistema
+theme_dark: Oscuro
+theme_light: Claro
+menu_help: Ay&uda
+menu_about: '&Acerca de…'
+layer_tab: Capa {n}
+group_keys: Teclas
+group_knobs: Knobs
+knob_n: Knob {n}
+knob_ccw: Girar ⟲
+knob_press: Pulsar
+knob_cw: Girar ⟳
+group_action: Acción de la selección
+group_yaml: YAML generado
+sel_button: Tecla {label}  (capa {layer})
+sel_knob: Knob {n} — {slot}  (capa {layer})
+tab_keyboard: Teclado
+tab_media: Multimedia
+tab_advanced: Avanzado
+combo_none: — ninguna —
+btn_add_step: Añadir paso a la macro
+btn_remove_step: Quitar paso seleccionado
+btn_clear: Limpiar tecla
+kb_hint: Haga clic en los modificadores (Ctrl, Shift…) y en una tecla para armar la combinación. El teclado
+  muestra la distribución elegida en el menú Teclado; el macropad graba la posición física (HID) de la
+  tecla — el carácter final depende de la distribución activa en el sistema operativo.
+chord_tooltip: Pasos ejecutados en secuencia con una sola pulsación (máx. 5).
+media_hint: Las teclas multimedia no aceptan modificadores ni macros.
+adv_placeholder: 'ej.: ctrl-alt-t  |  click(left)  |  <110>'
+adv_hint: 'Expresión libre en el dialecto del firmware.
+
+  Ratón: click(left), wheel(-1), move(5,0), drag(left,0,5)
+
+  Código bruto: <110>   Macro: ctrl-c,ctrl-v
+
+
+  El macropad solo envía teclas — no ejecuta comandos.
+
+  Para abrir un programa, asigne aquí una tecla F13–F24 y cree
+
+  un atajo de sistema (KDE/GNOME) que ejecute el comando.'
+group.letters: Letras
+group.digits: Números
+group.function: Función
+group.navigation: Navegación
+group.punct: Puntuación y control
+group.numpad: Teclado numérico
+group.misc: Varios
+group_test: Área de prueba
+test_placeholder: Haga clic aquí y pulse las teclas del macropad…
+test_hint: Muestra lo que cada tecla envía al sistema. Las teclas de multimedia/volumen pueden ser capturadas
+  por el escritorio antes de llegar aquí.
+btn_clear_log: Limpiar
+btn_validate: Validar
+btn_upload: Enviar al macropad
+status_ready: Listo.
+status_valid: Configuración válida.
+status_uploaded: Enviado al macropad con éxito.
+status_opened: 'Abierto: {name}'
+status_saved: 'Guardado: {name}'
+dev_no_tool: ⚠ ch57x-keyboard-tool no encontrado
+overlay_install_title: Herramienta necesaria
+overlay_install_body: CH57x Deck necesita ch57x-keyboard-tool para comunicarse con el macropad. Aún no
+  se encontró en este equipo.
+btn_install_tool: Instalar
+btn_installing: Instalando…
+status_tool_installed: ch57x-keyboard-tool instalado con éxito.
+dlg_install_fail: Fallo al instalar
+dev_absent: ⚠ Macropad no detectado (USB 1189)
+dev_connected: ● Macropad conectado
+dev_no_access: ⚠ Macropad detectado, pero sin permiso USB
+dlg_open_title: Abrir configuración
+dlg_save_title: Guardar configuración
+dlg_open_error: Error al abrir
+dlg_invalid: Configuración inválida
+dlg_upload_fail: Fallo en el envío
+udev_hint: '
+
+
+  Sin permiso en el USB. Instale la regla udev:
+
+  sudo cp udev/70-macropad-ch57x.rules /etc/udev/rules.d/
+
+  sudo udevadm control --reload-rules && sudo udevadm trigger'
+dlg_perm_title: Permiso USB
+dlg_perm_text: 'El macropad fue detectado, pero su usuario aún no tiene permiso para escribir en él.
+
+
+  ¿Instalar ahora la regla de sistema (udev) que concede el acceso? La contraseña de administrador se
+  pedirá una sola vez.'
+btn_install_rule: Instalar ahora
+btn_later: Más tarde
+perm_ok: Permiso USB configurado con éxito.
+perm_replug: Regla instalada, pero el acceso aún no se aplicó. Desconecte y reconecte el macropad.
+perm_fail: 'La instalación de la regla falló:
+
+  {msg}'
+invalid_action_button: La acción “{action}” en la tecla {label} (capa {layer}) no es una tecla válida
+  del firmware.
+invalid_action_knob: La acción “{action}” en el knob {n} ({slot}, capa {layer}) no es válida para el firmware.
+invalid_action_hint: 'El macropad solo envía teclas — no puede abrir programas ni ejecutar comandos.
+
+
+  Para abrir un programa (ej.: kcalc):
+
+  1. Asigne esta tecla como F13–F24 (pestaña Teclado → grupo Función) y envíela al macropad.
+
+  2. En el escritorio: Preferencias del Sistema → Teclado → Atajos → Añadir nuevo → Comando o script…
+  → escriba el comando.
+
+  3. En el atajo creado, pulse la tecla física del macropad.'
+yaml_filter: YAML (*.yaml *.yml)
+about_title: Acerca de CH57x Deck
+about_text: '<h3>CH57x Deck</h3><p>Versión {version}</p><p>Creado por <b>Péricles Sávio</b>.</p><p>Frontend
+  gráfico para <a href=''https://github.com/kriomant/ch57x-keyboard-tool'' style=''color:{link_color}''>ch57x-keyboard-tool</a>:
+  arma la configuración del macropad en una interfaz visual y delega en ese binario toda la comunicación
+  USB (validación y grabación en el firmware del dispositivo).</p><p>Licencia: <b>GPL-3.0-or-later</b>.</p>'

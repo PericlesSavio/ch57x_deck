@@ -57,11 +57,7 @@ variants:
   it'll detect and reuse that copy instead of pulling the pip wheel.
 - `ch57x-keyboard-tool`: if it's not on the PATH, the app itself offers to
   download the official release on first run (into
-  `~/.local/share/ch57x_deck/bin`). The download is **checked by SHA-256**
-  against an embedded hash before running — it never executes an unverified
-  binary. Under **Help → Update ch57x-keyboard-tool…** you can see the
-  installed version, (re)install the verified stable version and check GitHub
-  for a newer stable release.
+  `~/.local/share/ch57x_deck/bin`).
 
 ## Installation
 
@@ -152,10 +148,36 @@ from the repository with `python run.py`.
      `wheel(-1)`), raw code (`<110>`), manual macros (`ctrl-c,ctrl-v`).
 4. **Validate** checks the YAML; **Send to macropad** writes it to firmware.
 
+The **Edit** menu helps while building: undo/redo (`Ctrl+Z` / `Ctrl+Shift+Z`),
+copy and paste a key's action onto another (`Ctrl+Shift+C` / `Ctrl+Shift+V`),
+and **copy the current layer** onto another as a starting point.
+
+The **Clear key** button (red, in the bottom bar) wipes the selected action for
+all three tabs. On upload, an empty key is **disabled** on the device — the
+previous mapping is overwritten.
+
 The last uploaded configuration is kept at
 `~/.config/ch57x_deck/current.yaml` (and reloaded when the app opens).
 `File → Save/Open` exports and imports YAML compatible with plain
 `ch57x-keyboard-tool`.
+
+## What's new
+
+### 0.9.1
+- **Edit** menu: undo/redo, copy/paste an action between keys, duplicate a layer.
+- **Clear key** moved to the bottom bar, working for all three tabs; an empty key
+  now **disables** the key on the device on upload (it used to keep the previous
+  mapping).
+- Translations split into [`macropad/locales/`](macropad/locales/) — one file per
+  language, easy to translate.
+- Qt's built-in texts translated (Show Details…, OK, Cancel).
+- Removed the online update of `ch57x-keyboard-tool`; the app installs the
+  version it ships with.
+
+### 0.9.0
+- First release: 3/6/9/12/15-key models (**Model** menu), keyboard layouts
+  (ABNT2, AZERTY, QWERTZ…), light/dark theme following the system, menu
+  shortcuts, curl installer, desktop integration and the GPL-3.0 license.
 
 ## Future plans
 
@@ -186,13 +208,13 @@ from a locally saved YAML.
 | `macropad/model.py` | In-memory config + YAML (de)serialization |
 | `macropad/keys.py` | Catalog of the firmware's keys/modifiers |
 | `macropad/backend.py` | Calls ch57x-keyboard-tool; detects USB via sysfs |
-| `macropad/tool_manager.py` | Install/update dialog for the binary (verifies SHA-256) |
 | `macropad/action_editor.py` | Widget for editing one action |
 | `macropad/keyboard_widget.py` | Clickable visual keyboard |
 | `macropad/layouts.py` | Physical keyboard layouts (ABNT2, AZERTY…) |
 | `macropad/test_area.py` | Test area (captures what the pad sends) |
 | `macropad/main_window.py` | Main window |
-| `macropad/i18n.py` | Translations (pt-BR, en, es) |
+| `macropad/i18n.py` | Loads translations and selects the language |
+| `macropad/locales/*.yaml` | Translations, one file per language (pt-BR, en, es) |
 | `macropad/settings.py` | Persistent preferences |
 | `macropad/theme.py` | Monokai + light theme; follows the system theme |
 | `tests/` | Pure-logic tests (pytest, no hardware or Qt) |
@@ -202,8 +224,19 @@ from a locally saved YAML.
 | `assets/ch57x-deck.desktop` | Application menu shortcut |
 | `install.sh` | One-step install/uninstall (`--uninstall`) |
 | `packaging/ch57x-deck-uninstall` | Self-contained uninstall, run by `install.sh --uninstall` |
-| `scripts/pin_release.py` | Maintenance: pins the SHA-256 of a new stable binary release |
 | `LICENSE` | GPL-3.0 text |
+
+## Translations
+
+Each language is a file under [`macropad/locales/`](macropad/locales/) — plain
+text anyone can edit. To add a language:
+
+1. Copy `en.yaml` to `<code>.yaml` (e.g. `fr.yaml`, `de.yaml`).
+2. Translate only the **values** after the colons — keep the keys, the
+   `{ }` fields (e.g. `{version}`) and any HTML markup.
+3. Register the code in `LANGUAGES`, in [`macropad/i18n.py`](macropad/i18n.py).
+
+A translation pull request needs no tooling beyond a text editor.
 
 ## Tests
 

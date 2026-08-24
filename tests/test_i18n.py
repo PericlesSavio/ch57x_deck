@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import pytest
+import yaml
 
 from macropad import i18n
 
@@ -12,6 +13,20 @@ from macropad import i18n
 def test_every_string_has_all_languages(lang):
     missing = [key for key, entry in i18n.STRINGS.items() if lang not in entry]
     assert not missing, f"faltam traduções em {lang}: {missing}"
+
+
+def test_locale_files_exist_with_matching_keys():
+    """Os YAMLs de cada idioma existem e cobrem exatamente as mesmas chaves."""
+    keys_by_lang = {}
+    for lang in i18n.LANGUAGES:
+        path = i18n._LOCALES_DIR / f"{lang}.yaml"
+        assert path.is_file(), f"falta o arquivo {lang}.yaml"
+        keys_by_lang[lang] = set(yaml.safe_load(path.read_text(encoding="utf-8")) or {})
+    base = keys_by_lang["en"]
+    for lang, keys in keys_by_lang.items():
+        assert keys == base, (
+            f"{lang}.yaml diverge — só nele: {keys - base}; faltando: {base - keys}"
+        )
 
 
 def test_default_language_is_pt_br():

@@ -1,0 +1,163 @@
+# CH57x Deck — English translations.
+#
+# To add a language: copy en.yaml to <code>.yaml (e.g. fr.yaml, de.yaml),
+# register the code in macropad/i18n.py (LANGUAGES) and translate only the
+# VALUES to the right of the colons. Do NOT change the keys, the fields in
+# braces ({version}, {n}…) or the HTML markup (<b>, <a href=…>).
+# The '&' before a letter marks a menu accelerator (you may move it).
+
+app_title: CH57x Deck — Macropad Configurator
+menu_file: '&File'
+menu_open: '&Open YAML…'
+menu_save: '&Save YAML…'
+menu_quit: '&Quit'
+menu_edit: '&Edit'
+edit_undo: Undo
+edit_redo: Redo
+edit_copy_action: Copy action
+edit_paste_action: Paste action
+edit_copy_layer: Copy current layer to
+status_action_copied: Action copied.
+status_action_pasted: Action pasted.
+status_layer_copied: Layer {src} copied to layer {dest}.
+menu_view_yaml: '&View YAML…'
+menu_view: '&View'
+menu_toggle_test: '&Test area'
+menu_device: '&Model'
+variant_summary: '{keys} keys · {knobs}'
+knob_one: 1 knob
+knob_many: '{n} knobs'
+variant_tested: (tested)
+variant_untested: (untested)
+menu_custom_layout: Custom…
+dlg_custom_title: Custom layout
+custom_note: Adjust your macropad's layout. Only the 12-key + 2-knob model has been tested; the others
+  are assumed.
+lbl_rows: Rows
+lbl_columns: Columns
+lbl_knobs: Knobs
+menu_keyboard: '&Keyboard'
+kbd_us: US / International (default)
+kbd_abnt2: ABNT2 (Brazil)
+kbd_es: Spanish (Spain)
+kbd_fr: French (AZERTY)
+kbd_de: German (QWERTZ)
+kbd_uk: United Kingdom (UK)
+menu_language: '&Language'
+menu_theme: '&Theme'
+theme_system: System
+theme_dark: Dark
+theme_light: Light
+menu_help: '&Help'
+menu_about: '&About…'
+layer_tab: Layer {n}
+group_keys: Keys
+group_knobs: Knobs
+knob_n: Knob {n}
+knob_ccw: Turn ⟲
+knob_press: Press
+knob_cw: Turn ⟳
+group_action: Selected key action
+group_yaml: Generated YAML
+sel_button: Key {label}  (layer {layer})
+sel_knob: Knob {n} — {slot}  (layer {layer})
+tab_keyboard: Keyboard
+tab_media: Media
+tab_advanced: Advanced
+combo_none: — none —
+btn_add_step: Add macro step
+btn_remove_step: Remove selected step
+btn_clear: Clear key
+kb_hint: Click the modifiers (Ctrl, Shift…) and a key to build the combo. The keyboard shows the layout
+  picked in the Keyboard menu; the macropad records the physical key position (HID) — the final character
+  depends on the layout active in the operating system.
+chord_tooltip: Steps executed in sequence on a single press (max. 5).
+media_hint: Media keys accept neither modifiers nor macros.
+adv_placeholder: 'e.g.: ctrl-alt-t  |  click(left)  |  <110>'
+adv_hint: 'Free-form expression in the firmware dialect.
+
+  Mouse: click(left), wheel(-1), move(5,0), drag(left,0,5)
+
+  Raw code: <110>   Macro: ctrl-c,ctrl-v
+
+
+  The macropad only sends keys — it does not run commands.
+
+  To launch a program, map an F13–F24 key here and create a
+
+  system shortcut (KDE/GNOME) that runs the command.'
+group.letters: Letters
+group.digits: Digits
+group.function: Function
+group.navigation: Navigation
+group.punct: Punctuation & control
+group.numpad: Numeric keypad
+group.misc: Miscellaneous
+group_test: Test area
+test_placeholder: Click here and press the macropad keys…
+test_hint: Shows what each key sends to the system. Media/volume keys may be grabbed by the desktop before
+  reaching this area.
+btn_clear_log: Clear
+btn_validate: Validate
+btn_upload: Send to macropad
+status_ready: Ready.
+status_valid: Configuration is valid.
+status_uploaded: Successfully sent to the macropad.
+status_opened: 'Opened: {name}'
+status_saved: 'Saved: {name}'
+dev_no_tool: ⚠ ch57x-keyboard-tool not found
+overlay_install_title: Required tool missing
+overlay_install_body: CH57x Deck needs ch57x-keyboard-tool to talk to the macropad. It hasn't been found
+  on this computer yet.
+btn_install_tool: Install
+btn_installing: Installing…
+status_tool_installed: ch57x-keyboard-tool installed successfully.
+dlg_install_fail: Installation failed
+dev_absent: ⚠ Macropad not detected (USB 1189)
+dev_connected: ● Macropad connected
+dev_no_access: ⚠ Macropad detected, but no USB permission
+dlg_open_title: Open configuration
+dlg_save_title: Save configuration
+dlg_open_error: Error opening file
+dlg_invalid: Invalid configuration
+dlg_upload_fail: Upload failed
+udev_hint: '
+
+
+  No USB permission. Install the udev rule:
+
+  sudo cp udev/70-macropad-ch57x.rules /etc/udev/rules.d/
+
+  sudo udevadm control --reload-rules && sudo udevadm trigger'
+dlg_perm_title: USB permission
+dlg_perm_text: 'The macropad was detected, but your user does not yet have permission to write to it.
+
+
+  Install the system (udev) rule that grants access now? The administrator password will be asked only
+  once.'
+btn_install_rule: Install now
+btn_later: Later
+perm_ok: USB permission configured successfully.
+perm_replug: Rule installed, but access has not taken effect yet. Unplug and replug the macropad.
+perm_fail: 'Installing the rule failed:
+
+  {msg}'
+invalid_action_button: The action “{action}” on key {label} (layer {layer}) is not a valid firmware key.
+invalid_action_knob: The action “{action}” on knob {n} ({slot}, layer {layer}) is not valid for the firmware.
+invalid_action_hint: 'The macropad only sends keys — it cannot launch programs or run commands.
+
+
+  To launch a program (e.g. kcalc):
+
+  1. Map this key as F13–F24 (Keyboard tab → Function group) and send it to the macropad.
+
+  2. In your desktop: System Settings → Keyboard → Shortcuts → Add new → Command or script… → type the
+  command.
+
+  3. In the new shortcut, press the physical macropad key.'
+yaml_filter: YAML (*.yaml *.yml)
+about_title: About CH57x Deck
+about_text: '<h3>CH57x Deck</h3><p>Version {version}</p><p>Created by <b>Péricles Sávio</b>.</p><p>Graphical
+  frontend for <a href=''https://github.com/kriomant/ch57x-keyboard-tool'' style=''color:{link_color}''>ch57x-keyboard-tool</a>:
+  builds the macropad configuration in a visual interface and delegates all USB communication (validation
+  and writing to the device firmware) to that binary.</p><p>License: <b>GPL-3.0-or-later</b>.</p>'

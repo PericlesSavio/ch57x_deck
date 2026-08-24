@@ -61,11 +61,7 @@ genéricas del chip CH57x:
   el wheel de pip.
 - `ch57x-keyboard-tool`: si no está en el PATH, la propia app ofrece
   descargar la versión oficial en la primera ejecución (en
-  `~/.local/share/ch57x_deck/bin`). La descarga se **verifica por SHA-256**
-  contra un hash embebido antes de ejecutarse — nunca ejecuta un binario sin
-  verificar. En **Ayuda → Actualizar ch57x-keyboard-tool…** puede ver la
-  versión instalada, (re)instalar la versión estable verificada y comprobar
-  en GitHub si salió una estable nueva.
+  `~/.local/share/ch57x_deck/bin`).
 
 ## Instalación
 
@@ -158,10 +154,38 @@ directamente desde el repositorio con `python run.py`.
 4. **Validar** revisa el YAML; **Enviar al macropad** lo graba en el
    firmware.
 
+El menú **Editar** ayuda al armar: deshacer/rehacer (`Ctrl+Z` / `Ctrl+Shift+Z`),
+copiar y pegar la acción de una tecla en otra (`Ctrl+Shift+C` / `Ctrl+Shift+V`)
+y **copiar la capa actual** a otra como punto de partida.
+
+El botón **Limpiar tecla** (rojo, en la barra inferior) borra la acción de la
+selección, valiendo para las tres pestañas. Al enviar, una tecla vacía se
+**desactiva** en el dispositivo — la asignación anterior se sobrescribe.
+
 La última configuración enviada queda en
 `~/.config/ch57x_deck/current.yaml` (y se recarga al abrir la app).
 `Archivo → Guardar/Abrir` exporta e importa YAML compatible con el
 `ch57x-keyboard-tool` puro.
+
+## Novedades
+
+### 0.9.1
+- Menú **Editar**: deshacer/rehacer, copiar/pegar la acción entre teclas y
+  duplicar una capa.
+- **Limpiar tecla** en la barra inferior, valiendo para las tres pestañas; una
+  tecla vacía ahora **desactiva** la tecla en el dispositivo al enviar (antes se
+  mantenía la asignación anterior).
+- Traducciones separadas en [`macropad/locales/`](macropad/locales/) — una por
+  idioma, fáciles de traducir.
+- Textos estándar de Qt traducidos (Mostrar los detalles…, OK, Cancelar).
+- Eliminada la actualización en línea de `ch57x-keyboard-tool`; la app instala la
+  versión que ya trae incorporada.
+
+### 0.9.0
+- Primera versión: modelos de 3/6/9/12/15 teclas (menú **Modelo**),
+  distribuciones de teclado (ABNT2, AZERTY, QWERTZ…), tema claro/oscuro que sigue
+  el sistema, atajos de menú, instalador por `curl`, integración con el escritorio
+  y licencia GPL-3.0.
 
 ## Planes futuros
 
@@ -192,13 +216,13 @@ un YAML guardado localmente.
 | `macropad/model.py` | Config en memoria + (de)serialización YAML |
 | `macropad/keys.py` | Catálogo de teclas/modificadores del firmware |
 | `macropad/backend.py` | Llama a ch57x-keyboard-tool; detecta el USB vía sysfs |
-| `macropad/tool_manager.py` | Diálogo de instalar/actualizar el binario (verifica SHA-256) |
 | `macropad/action_editor.py` | Widget de edición de una acción |
 | `macropad/keyboard_widget.py` | Teclado visual clicable |
 | `macropad/layouts.py` | Distribuciones físicas del teclado (ABNT2, AZERTY…) |
 | `macropad/test_area.py` | Área de prueba (captura lo que envía el pad) |
 | `macropad/main_window.py` | Ventana principal |
-| `macropad/i18n.py` | Traducciones (pt-BR, en, es) |
+| `macropad/i18n.py` | Carga las traducciones y elige el idioma |
+| `macropad/locales/*.yaml` | Traducciones, una por idioma (pt-BR, en, es) |
 | `macropad/settings.py` | Preferencias persistentes |
 | `macropad/theme.py` | Tema Monokai + claro; sigue el tema del sistema |
 | `tests/` | Pruebas de lógica pura (pytest, sin hardware ni Qt) |
@@ -208,8 +232,19 @@ un YAML guardado localmente.
 | `assets/ch57x-deck.desktop` | Acceso directo para el menú de aplicaciones |
 | `install.sh` | Instalación/desinstalación en un paso (`--uninstall`) |
 | `packaging/ch57x-deck-uninstall` | Desinstalación autocontenida, invocada por `install.sh --uninstall` |
-| `scripts/pin_release.py` | Mantenimiento: fija el SHA-256 de una versión estable nueva del binario |
 | `LICENSE` | Texto de la GPL-3.0 |
+
+## Traducciones
+
+Cada idioma es un archivo en [`macropad/locales/`](macropad/locales/) — texto
+simple que cualquiera puede editar. Para añadir un idioma:
+
+1. Copie `en.yaml` a `<código>.yaml` (ej.: `fr.yaml`, `de.yaml`).
+2. Traduzca solo los **valores** a la derecha de los dos puntos — conserve las
+   claves, los campos entre `{ }` (ej.: `{version}`) y las marcas HTML.
+3. Registre el código en `LANGUAGES`, en [`macropad/i18n.py`](macropad/i18n.py).
+
+Un aporte de traducción (pull request) no necesita más que un editor de texto.
 
 ## Pruebas
 

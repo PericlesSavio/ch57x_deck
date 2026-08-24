@@ -43,13 +43,9 @@ class ActionEditor(QWidget):
         self._tabs.addTab(self._build_media_tab(), tr("tab_media"))
         self._tabs.addTab(self._build_advanced_tab(), tr("tab_advanced"))
 
-        clear = QPushButton(tr("btn_clear"))
-        clear.clicked.connect(self._clear)
-
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self._tabs, stretch=1)
-        layout.addWidget(clear, alignment=Qt.AlignmentFlag.AlignRight)
 
     # ------------------------------------------------------------------
     # Abas
@@ -89,6 +85,10 @@ class ActionEditor(QWidget):
         layout.addLayout(row, stretch=1)
         layout.addWidget(hint)
         return tab
+
+    def clear_action(self) -> None:
+        """Limpa a ação da seleção (vale para as três abas)."""
+        self._clear()
 
     def _build_media_tab(self) -> QWidget:
         tab = QWidget()

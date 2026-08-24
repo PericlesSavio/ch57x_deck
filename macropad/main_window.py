@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import copy
 import re
 from pathlib import Path
 
@@ -37,11 +38,19 @@ from PySide6.QtWidgets import (
 from . import __version__, layouts, model, settings, theme
 from .action_editor import ActionEditor
 from .backend import Backend, config_dir
-from .i18n import LANGUAGES, current_language, set_language, tr
+from .i18n import (
+    LANGUAGES,
+    current_language,
+    install_qt_translations,
+    set_language,
+    tr,
+)
 from .test_area import TestArea
 
 # (slot no modelo, chave de tradução do rótulo)
 _KNOB_SLOTS = [("ccw", "knob_ccw"), ("press", "knob_press"), ("cw", "knob_cw")]
+
+_UNDO_LIMIT = 60  # profundidade máxima da pilha de desfazer
 
 # Padrões do erro do ch57x-keyboard-tool apontando a ação inválida.
 _BUTTON_ERR = re.compile(r"layers\[(\d+)\]\.buttons\[(\d+)\]\[(\d+)\]")
@@ -61,6 +70,12 @@ class MainWindow(QMainWindow):
         self.selection: tuple[str, int, int | str] | None = None
         self._dirty = False
         self._theme_mode = settings.get("theme", theme.DEFAULT_SETTING)
+
+        # Histórico de edição (snapshots do Config) e clipboard de ação.
+        self._undo_stack: list[model.Config] = []
+        self._redo_stack: list[model.Config] = []
+        self._last_coalesce_key: object = None
+        self._action_clipboard: str | None = None
 
         self._build_menu()
         self._build_ui()
@@ -106,6 +121,8 @@ class MainWindow(QMainWindow):
         quit_action.triggered.connect(self.close)
         menu.addAction(quit_action)
 
+        self._build_edit_menu()
+
         view_menu = self.menuBar().addMenu(tr("menu_view"))
         self._test_area_action = QAction(tr("menu_toggle_test"), self)
         self._test_area_action.setShortcut(QKeySequence("Ctrl+T"))
@@ -145,14 +162,149 @@ class MainWindow(QMainWindow):
             lang_menu.addAction(action)
 
         help_menu = self.menuBar().addMenu(tr("menu_help"))
-        tool_action = QAction(tr("menu_tool"), self)
-        tool_action.triggered.connect(self._manage_tool)
-        help_menu.addAction(tool_action)
-        help_menu.addSeparator()
         about_action = QAction(tr("menu_about"), self)
         about_action.setShortcut(QKeySequence.StandardKey.HelpContents)
         about_action.triggered.connect(self._show_about)
         help_menu.addAction(about_action)
+
+    def _build_edit_menu(self) -> None:
+        """Menu 'Editar': desfazer/refazer, copiar/colar ação, duplicar camada."""
+        edit_menu = self.menuBar().addMenu(tr("menu_edit"))
+
+        self._undo_action = QAction(tr("edit_undo"), self)
+        self._undo_action.setShortcut(QKeySequence.StandardKey.Undo)  # Ctrl+Z
+        self._undo_action.triggered.connect(self._undo)
+        edit_menu.addAction(self._undo_action)
+
+        self._redo_action = QAction(tr("edit_redo"), self)
+        # Ctrl+Shift+Z (Ctrl+Y já é "Ver YAML").
+        self._redo_action.setShortcut(QKeySequence("Ctrl+Shift+Z"))
+        self._redo_action.triggered.connect(self._redo)
+        edit_menu.addAction(self._redo_action)
+
+        edit_menu.addSeparator()
+        # Ctrl+Shift+C/V para não roubar o copiar/colar de texto dos campos.
+        self._copy_act = QAction(tr("edit_copy_action"), self)
+        self._copy_act.setShortcut(QKeySequence("Ctrl+Shift+C"))
+        self._copy_act.triggered.connect(self._copy_action)
+        edit_menu.addAction(self._copy_act)
+
+        self._paste_act = QAction(tr("edit_paste_action"), self)
+        self._paste_act.setShortcut(QKeySequence("Ctrl+Shift+V"))
+        self._paste_act.triggered.connect(self._paste_action)
+        edit_menu.addAction(self._paste_act)
+
+        edit_menu.addSeparator()
+        copy_layer_menu = edit_menu.addMenu(tr("edit_copy_layer"))
+        self._copy_layer_actions: list[QAction] = []
+        for i in range(model.LAYER_COUNT):
+            action = QAction(tr("layer_tab", n=i + 1), self)
+            action.triggered.connect(lambda _=False, dest=i: self._copy_layer_to(dest))
+            copy_layer_menu.addAction(action)
+            self._copy_layer_actions.append(action)
+
+        edit_menu.aboutToShow.connect(self._update_edit_menu)
+
+    # ------------------------------------------------------------------
+    # Histórico (desfazer/refazer) e área de transferência de ação
+    # ------------------------------------------------------------------
+
+    def _record_undo(self, coalesce_key: object = None) -> None:
+        """Salva o estado atual para desfazer. Edições consecutivas com a mesma
+        `coalesce_key` (ex.: a mesma tecla) contam como uma operação só."""
+        if coalesce_key is not None and coalesce_key == self._last_coalesce_key:
+            return
+        self._undo_stack.append(self.config.copy())
+        if len(self._undo_stack) > _UNDO_LIMIT:
+            del self._undo_stack[0]
+        self._redo_stack.clear()
+        self._last_coalesce_key = coalesce_key
+
+    def _reset_undo(self) -> None:
+        self._undo_stack.clear()
+        self._redo_stack.clear()
+        self._last_coalesce_key = None
+
+    def _undo(self) -> None:
+        if not self._undo_stack:
+            return
+        self._redo_stack.append(self.config.copy())
+        self.config = self._undo_stack.pop()
+        self._last_coalesce_key = None
+        self._after_config_restored()
+
+    def _redo(self) -> None:
+        if not self._redo_stack:
+            return
+        self._undo_stack.append(self.config.copy())
+        self.config = self._redo_stack.pop()
+        self._last_coalesce_key = None
+        self._after_config_restored()
+
+    def _after_config_restored(self) -> None:
+        """Reflete na interface uma config trocada por baixo (undo/redo/colar)."""
+        self._dirty = True
+        self._refresh_pad_labels()
+        self._refresh_yaml()
+        self._reselect()
+
+    def _reselect(self) -> None:
+        if not self.selection:
+            return
+        kind, a, b = self.selection
+        if kind == "button":
+            self._select_button(a, b)
+        else:
+            self._select_knob(a, b)
+
+    def _current_action(self) -> str:
+        kind, a, b = self.selection
+        if kind == "button":
+            return self.config.get(self.current_layer, a, b)
+        return getattr(self.config.layers[self.current_layer].knobs[a], b)
+
+    def _apply_action(self, action: str) -> None:
+        kind, a, b = self.selection
+        if kind == "button":
+            self.config.set(self.current_layer, a, b, action)
+        else:
+            setattr(self.config.layers[self.current_layer].knobs[a], b, action)
+
+    def _copy_action(self) -> None:
+        if not self.selection:
+            return
+        self._action_clipboard = self._current_action()
+        self.statusBar().showMessage(tr("status_action_copied"))
+
+    def _paste_action(self) -> None:
+        if not self.selection or self._action_clipboard is None:
+            return
+        self._record_undo()  # operação discreta
+        self._apply_action(self._action_clipboard)
+        self._after_config_restored()
+        self.statusBar().showMessage(tr("status_action_pasted"))
+
+    def _copy_layer_to(self, dest: int) -> None:
+        if dest == self.current_layer:
+            return
+        self._record_undo()
+        self.config.layers[dest] = copy.deepcopy(self.config.layers[self.current_layer])
+        self._dirty = True
+        self._refresh_pad_labels()
+        self._refresh_yaml()
+        self.statusBar().showMessage(
+            tr("status_layer_copied", src=self.current_layer + 1, dest=dest + 1)
+        )
+
+    def _update_edit_menu(self) -> None:
+        self._undo_action.setEnabled(bool(self._undo_stack))
+        self._redo_action.setEnabled(bool(self._redo_stack))
+        self._copy_act.setEnabled(self.selection is not None)
+        self._paste_act.setEnabled(
+            self.selection is not None and self._action_clipboard is not None
+        )
+        for i, action in enumerate(self._copy_layer_actions):
+            action.setEnabled(i != self.current_layer)
 
     def _build_device_menu(self) -> None:
         """Menu 'Modelo': troca o layout entre as variantes 3/6/9/12/15."""
@@ -402,6 +554,13 @@ class MainWindow(QMainWindow):
         send_row.addWidget(self._device_label)
         send_row.addStretch()
 
+        # "Limpar tecla" fica aqui (fora das abas), então vale para as três
+        # abas do editor; em vermelho por ser uma ação destrutiva.
+        clear_btn = QPushButton(tr("btn_clear"))
+        clear_btn.setProperty("role", "danger")
+        clear_btn.clicked.connect(lambda: self.editor.clear_action())
+        send_row.addWidget(clear_btn)
+
         validate_btn = QPushButton(tr("btn_validate"))
         validate_btn.clicked.connect(self._validate)
         send_row.addWidget(validate_btn)
@@ -511,6 +670,8 @@ class MainWindow(QMainWindow):
         if not self.selection:
             return
         kind, a, b = self.selection
+        # Edições seguidas da mesma tecla/camada agrupam num único desfazer.
+        self._record_undo((self.current_layer, kind, a, b))
         if kind == "button":
             self.config.set(self.current_layer, a, b, action)
         else:
@@ -626,6 +787,7 @@ class MainWindow(QMainWindow):
         except (OSError, model.ConfigError) as exc:
             QMessageBox.critical(self, tr("dlg_open_error"), str(exc))
             return
+        self._reset_undo()  # a config nova é um recomeço; o histórico não cruza
         self._dirty = True
         self._layer_bar.setCurrentIndex(0)
         self.current_layer = 0
@@ -684,14 +846,17 @@ class MainWindow(QMainWindow):
         box.exec()
 
     def _validate(self) -> None:
-        result = self.backend.validate(self.config.to_yaml())
+        # Valida o mesmo YAML que será enviado (teclas vazias como <0>).
+        result = self.backend.validate(self.config.to_yaml(disable_empty=True))
         if result.ok:
             self.statusBar().showMessage(tr("status_valid"))
         else:
             self._show_invalid_config(result.message)
 
     def _upload(self) -> None:
-        yaml_text = self.config.to_yaml()
+        # Envia teclas vazias como <0> para que o firmware seja sobrescrito
+        # (com null, o ch57x-keyboard-tool pula a tecla e mantém o valor antigo).
+        yaml_text = self.config.to_yaml(disable_empty=True)
         result = self.backend.validate(yaml_text)
         if not result.ok:
             self._show_invalid_config(result.message)
@@ -785,15 +950,10 @@ class MainWindow(QMainWindow):
         if code == current_language():
             return
         set_language(code)
+        install_qt_translations(QApplication.instance())  # textos padrão do Qt
         # Reconstrói a janela na nova língua, preservando config e geometria.
         self._autosave()
         self._rebuild_window()
-
-    def _manage_tool(self) -> None:
-        from .tool_manager import ToolManagerDialog
-
-        ToolManagerDialog(self.backend, self).exec()
-        self._refresh_device_status()
 
     def _show_about(self) -> None:
         link_color = theme.PALETTES[theme.resolve_mode(self._theme_mode)].ACCENT

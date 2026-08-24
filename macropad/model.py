@@ -150,12 +150,26 @@ class Config:
     # YAML
     # ------------------------------------------------------------------
 
-    def to_yaml_dict(self) -> dict:
+    def to_yaml_dict(self, disable_empty: bool = False) -> dict:
+        """Serializa a config para dict.
+
+        `disable_empty=False` (padrão, para salvar/exportar): tecla sem ação vira
+        `null` — limpo e reversível. Mas no `upload` o ch57x-keyboard-tool *pula*
+        teclas `null` (não sobrescreve o que está no firmware).
+
+        `disable_empty=True` (para enviar ao dispositivo): tecla sem ação vira
+        `<0>` (código HID nulo). Assim o tool grava a tecla, desativando-a —
+        o vazio no app passa a valer no dispositivo. Nesse modo nenhuma camada é
+        omitida (todas são gravadas).
+        """
         self.normalize()
 
+        # O firmware não aceita string vazia; "sem ação" é null, ou <0> quando
+        # queremos sobrescrever/desativar a tecla no dispositivo.
+        empty = "<0>" if disable_empty else None
+
         def cell(action: str) -> str | None:
-            # O firmware não aceita string vazia; "sem ação" é null.
-            return action if action.strip() else None
+            return action if action.strip() else empty
 
         layers = []
         for layer in self.layers:
@@ -169,8 +183,9 @@ class Config:
                 ]
             layers.append(entry)
 
-        # Camadas vazias no fim da lista podem ser omitidas (o firmware
-        # aceita menos camadas do que o teclado tem).
+        # Camadas vazias no fim da lista podem ser omitidas (o firmware aceita
+        # menos camadas do que o teclado tem). Ao desativar teclas vazias não há
+        # o que omitir — todas ficam preenchidas com <0>.
         def is_empty(entry: dict) -> bool:
             buttons_empty = all(a is None for row in entry["buttons"] for a in row)
             knobs_empty = all(
@@ -178,8 +193,9 @@ class Config:
             )
             return buttons_empty and knobs_empty
 
-        while layers and is_empty(layers[-1]):
-            layers.pop()
+        if not disable_empty:
+            while layers and is_empty(layers[-1]):
+                layers.pop()
 
         return {
             "orientation": self.orientation,
@@ -189,10 +205,13 @@ class Config:
             "layers": layers,
         }
 
-    def to_yaml(self) -> str:
-        """Serializa no formato que o ch57x-keyboard-tool consome no stdin."""
+    def to_yaml(self, disable_empty: bool = False) -> str:
+        """Serializa no formato que o ch57x-keyboard-tool consome no stdin.
+
+        Ver `to_yaml_dict` para o efeito de `disable_empty`.
+        """
         return yaml.dump(
-            self.to_yaml_dict(),
+            self.to_yaml_dict(disable_empty),
             allow_unicode=True,
             default_flow_style=None,
             sort_keys=False,

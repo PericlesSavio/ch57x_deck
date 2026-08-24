@@ -8,7 +8,7 @@ from pathlib import Path
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication
 
-from . import settings, theme
+from . import i18n, settings, theme
 from .main_window import MainWindow
 
 _DESKTOP_ID = "ch57x-deck"
@@ -70,6 +70,8 @@ def main() -> int:
         app.setWindowIcon(QIcon.fromTheme(_DESKTOP_ID))
     app.setStyle("Fusion")  # base neutra e idêntica em qualquer distro/desktop
     app.setStyleSheet(theme.stylesheet_for(settings.get("theme", theme.DEFAULT_SETTING)))
+    # Traduz os textos padrão do Qt (Mostrar detalhes, OK, Cancelar…).
+    i18n.install_qt_translations(app)
 
     # No modo "sistema", reaplica o estilo quando o SO alterna claro/escuro.
     def _reapply_on_scheme_change(*_) -> None:
